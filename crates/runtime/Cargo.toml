@@ -1,0 +1,30 @@
+[package]
+name = "runtime"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+log = "0.4.27"
+parking_lot = "0.12.4"
+eframe = { version = "0.31.1", features = ["wgpu"] }
+
+# plugin-interface = { path = "../plugin-interface" }
+# libloading = "0.8.8"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+env_logger = "0.11.8"
+tokio = { version = "1.45.1", features = [
+    "macros",
+    "rt-multi-thread",
+    "parking_lot",
+] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+tokio = { version = "1.45.1", features = ["macros", "rt", "parking_lot"] }
+web-sys = { version = "0.3.77", features = [
+    "Window",
+    "Document",
+    "Element",
+    "HtmlCanvasElement",
+] }

@@ -1,0 +1,4 @@
+[build]
+target = "./index.html"
+public_url = "./"
+no_sri = true

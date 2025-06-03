@@ -1,0 +1,30 @@
+name: Deploy Website
+
+on:
+    push:
+        branches: ["master"]
+jobs:
+    deploy:
+        runs-on: windows-latest
+        permissions:
+            contents: write
+        steps:
+            - uses: actions/checkout@v4
+            - uses: jetli/trunk-action@v0.5.0
+            - name: Install Rust Target
+              run: rustup target install wasm32-unknown-unknown
+            - name: Build Website
+              run: trunk build --release
+            - name: Config Git
+              run: |
+                git config --local user.name "GitHubActions"
+                git config --local user.email "actions@github.com"
+            - name: Deploy Website
+              run: |
+                git fetch origin web
+                git checkout origin/web -- CNAME
+                mv CNAME dist/CNAME
+                git checkout --orphan web
+                git --work-tree dist add --all
+                git --work-tree dist commit -m "GitHub Actions Deploy Website"
+                git push origin web --force
