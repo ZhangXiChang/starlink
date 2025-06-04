@@ -3,6 +3,12 @@ name: Deploy Website
 on:
     push:
         branches: ["master"]
+        paths:
+            - crates/**
+            - resources/**
+            - Cargo.toml
+            - index.html
+            - trunk.toml
 jobs:
     deploy:
         runs-on: windows-latest
