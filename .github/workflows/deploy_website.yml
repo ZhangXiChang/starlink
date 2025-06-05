@@ -6,7 +6,6 @@ on:
         paths:
             - assets/**
             - crates/**
-            - resources/**
             - Cargo.toml
             - index.html
             - trunk.toml

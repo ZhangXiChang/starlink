@@ -75,7 +75,7 @@ impl eframe::App for Viewport {
                 ui.spacing_mut().item_spacing = egui::Vec2::ZERO;
 
                 if !cfg!(target_family = "wasm") {
-                    let response = ui
+                    let window_resize_south_east = ui
                         .interact(
                             egui::Rect::from_points(&[
                                 ui.max_rect().right_bottom() - egui::vec2(1., 1.),
@@ -85,7 +85,7 @@ impl eframe::App for Viewport {
                             egui::Sense::drag(),
                         )
                         .on_hover_cursor(egui::CursorIcon::ResizeSouthEast);
-                    if response.drag_started_by(egui::PointerButton::Primary) {
+                    if window_resize_south_east.drag_started_by(egui::PointerButton::Primary) {
                         ctx.send_viewport_cmd(egui::ViewportCommand::BeginResize(
                             egui::ResizeDirection::SouthEast,
                         ));
@@ -100,15 +100,17 @@ impl eframe::App for Viewport {
                     .vertical(|mut strip| {
                         if !cfg!(target_family = "wasm") {
                             strip.cell(|ui| {
-                                let response = ui.interact(
+                                let titlebar_window_drag_maximized = ui.interact(
                                     ui.max_rect(),
                                     egui::Id::new("titlebar_window_drag_maximized"),
                                     egui::Sense::click_and_drag(),
                                 );
-                                if response.drag_started_by(egui::PointerButton::Primary) {
+                                if titlebar_window_drag_maximized
+                                    .drag_started_by(egui::PointerButton::Primary)
+                                {
                                     ui.ctx().send_viewport_cmd(egui::ViewportCommand::StartDrag);
                                 }
-                                if response.double_clicked() {
+                                if titlebar_window_drag_maximized.double_clicked() {
                                     if let Some(maximized) =
                                         ui.input(|state| state.viewport().maximized)
                                     {
@@ -197,6 +199,16 @@ impl eframe::App for Viewport {
                                         );
                                     });
                                     strip.cell(|ui| {
+                                        ui.interact(
+                                            ui.max_rect(),
+                                            egui::Id::new("sub_app_view_context_menu"),
+                                            egui::Sense::click(),
+                                        )
+                                        .context_menu(
+                                            |ui| {
+                                                if ui.button("添加节点").clicked() {}
+                                            },
+                                        );
                                         egui::Window::new("子应用")
                                             .constrain_to(window_movable_area)
                                             .default_pos(ui.max_rect().shrink(64.).left_top())
