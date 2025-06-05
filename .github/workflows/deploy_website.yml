@@ -4,6 +4,7 @@ on:
     push:
         branches: ["master"]
         paths:
+            - assets/**
             - crates/**
             - resources/**
             - Cargo.toml

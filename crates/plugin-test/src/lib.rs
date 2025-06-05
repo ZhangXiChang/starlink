@@ -1,4 +1,4 @@
-use plugin_interface::{Plugin, PluginInfo, Result, Version};
+use plugin_interface::{Plugin, PluginInfo, Version};
 
 struct TestPlugin {
     info: PluginInfo,
@@ -6,10 +6,6 @@ struct TestPlugin {
 impl Plugin for TestPlugin {
     fn plugin_info(&self) -> &PluginInfo {
         &self.info
-    }
-    fn execute(&mut self) -> Result<()> {
-        println!("你好，世界");
-        Ok(())
     }
 }
 
