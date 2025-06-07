@@ -9,9 +9,9 @@ log = "0.4.27"
 parking_lot = "0.12.4"
 eframe = { version = "0.31.1", features = ["wgpu"] }
 egui_extras = { version = "0.31.1", features = ["all_loaders"] }
+user-interface = { path = "../user-interface" }
 
-# plugin-interface = { path = "../plugin-interface" }
-# libloading = "0.8.8"
+plugin-interface = { path = "../plugin-interface" }
 
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 env_logger = "0.11.8"
@@ -23,11 +23,16 @@ tokio = { version = "1.45.1", features = [
     "io-util",
 ] }
 image = "0.25.6"
+opener = "0.8.2"
+uuid = { version = "1.17.0", features = ["v4"] }
+
+libloading = "0.8.8"
 
 [target.'cfg(target_family = "wasm")'.dependencies]
 wasm-bindgen-futures = "0.4.50"
 web-sys = { version = "0.3.77", features = ["HtmlCanvasElement"] }
 gloo = "0.11.0"
+uuid = { version = "1.17.0", features = ["v4", "js"] }
 
 [target.'cfg(target_os = "windows")'.build-dependencies]
 embed-resource = "3.0.3"

@@ -3,13 +3,14 @@
     windows_subsystem = "windows"
 )]
 
+mod utils;
 mod viewport;
 
 use anyhow::anyhow;
 
 use crate::viewport::Viewport;
 
-const APP_NAME: &str = "应用名称";
+const APP_NAME: &str = "星链";
 
 #[cfg(not(target_family = "wasm"))]
 #[tokio::main]
@@ -50,6 +51,9 @@ fn main() {
             use anyhow::Context;
             use web_sys::wasm_bindgen::JsCast;
 
+            std::panic::set_hook(Box::new(|info| {
+                gloo::console::error!(info.to_string());
+            }));
             eframe::WebLogger::init(log::LevelFilter::Trace)?;
             log::debug!("日志开始记录");
             let document = gloo::utils::document();
@@ -64,7 +68,7 @@ fn main() {
                 .start(
                     canvas,
                     eframe::WebOptions::default(),
-                    Box::new(|cc| Ok(Box::new(Viewport::new(APP_NAME, cc)?))),
+                    Box::new(|cc| Ok(Box::new(Viewport::new(cc)?))),
                 )
                 .await
                 .map_err(|err| anyhow!("{:?}", err))?;
