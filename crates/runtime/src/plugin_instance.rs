@@ -10,7 +10,7 @@ pub struct PluginInstance {
     library: Library,
 }
 impl PluginInstance {
-    pub fn load(path: impl AsRef<Path>) -> Result<Self> {
+    pub fn load(path: impl into<String>) -> Result<Self> {
         let (library, instance) = unsafe {
             let library = Library::new(path.as_ref())?;
             let instance = *library

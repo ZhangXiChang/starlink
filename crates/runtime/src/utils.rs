@@ -16,29 +16,29 @@ where
     wasm_bindgen_futures::spawn_local(task);
 }
 
-pub fn open_path(path: impl AsRef<str>) -> Result<()> {
+pub fn open_path(path: impl Into<String>) -> Result<()> {
     #[cfg(not(target_family = "wasm"))]
-    opener::open(path.as_ref())?;
+    opener::open(path.into())?;
     #[cfg(target_family = "wasm")]
     {
         use anyhow::anyhow;
 
         gloo::utils::window()
-            .open_with_url(path.as_ref())
+            .open_with_url(&path.into())
             .map_err(|err| anyhow!("{:?}", err))?;
     }
     Ok(())
 }
 
 #[cfg(target_family = "wasm")]
-pub async fn load_resource(path: impl AsRef<str>) -> Result<Vec<u8>> {
+pub async fn load_resource(path: impl Into<String>) -> Result<Vec<u8>> {
     let resource;
     #[cfg(not(target_family = "wasm"))]
     {
         use tokio::{fs::File, io::AsyncReadExt};
 
         resource = Vec::new();
-        File::open(path.as_ref())
+        File::open(path.into())
             .await?
             .read_to_end(&mut resource)
             .await?;
@@ -47,7 +47,7 @@ pub async fn load_resource(path: impl AsRef<str>) -> Result<Vec<u8>> {
     {
         use gloo::net::http::Request;
 
-        resource = Request::get(path.as_ref()).send().await?.binary().await?;
+        resource = Request::get(&path.into()).send().await?.binary().await?;
     }
     Ok(resource)
 }

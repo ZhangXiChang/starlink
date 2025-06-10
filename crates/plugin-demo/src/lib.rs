@@ -13,7 +13,7 @@ impl PluginInterface for Plugin {
 extern "C" fn instantiation() -> Box<Box<dyn PluginInterface>> {
     Box::new(Box::new(Plugin {
         info: PluginInfo {
-            name: "测试插件".to_string(),
+            name: "测试插件".into(),
             version: Version::new(0, 1, 0),
         },
     }))
