@@ -59,7 +59,7 @@ impl Starlink {
         topic: TopicId,
         peer_node_addrs: Vec<NodeAddr>,
     ) -> Result<(GossipSender, GossipReceiver)> {
-        let mut peer_node_ids = Vec::new();
+        let mut peer_node_ids = vec![];
         for peer_node_addr in peer_node_addrs {
             peer_node_ids.push(peer_node_addr.node_id);
             self.router.endpoint().add_node_addr(peer_node_addr)?;

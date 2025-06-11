@@ -3,10 +3,10 @@
     windows_subsystem = "windows"
 )]
 
-mod system;
-mod ui_draw;
 mod utils;
 mod viewport;
+
+const APP_NAME: &str = "应用程序名称";
 
 fn main() {
     cei::main();
@@ -19,7 +19,7 @@ mod cei {
     use anyhow::{Result, anyhow};
     use eframe::egui;
 
-    use crate::viewport::Viewport;
+    use crate::{APP_NAME, viewport::Viewport};
 
     #[tokio::main]
     pub async fn main() {
@@ -35,7 +35,7 @@ mod cei {
     }
     async fn run() -> Result<()> {
         eframe::run_native(
-            "应用程序标题",
+            APP_NAME,
             eframe::NativeOptions {
                 viewport: {
                     let app_icon = image::load_from_memory(include_bytes!(
@@ -65,7 +65,7 @@ mod cei {
     use anyhow::{Context, Result, anyhow};
     use web_sys::wasm_bindgen::JsCast;
 
-    use crate::viewport::Viewport;
+    use crate::{APP_NAME, viewport::Viewport};
 
     pub fn main() {
         wasm_bindgen_futures::spawn_local(async move {
@@ -84,7 +84,7 @@ mod cei {
             .start(
                 {
                     let document = gloo::utils::document();
-                    document.set_title("应用程序标题");
+                    document.set_title(APP_NAME);
                     document
                         .query_selector("#viewport")
                         .map_err(|err| anyhow!("{:?}", err))?

@@ -9,7 +9,7 @@ use uuid::Uuid;
 
 use crate::{
     system::{Command, System, UIComponent},
-    utils::{async_task, open_path},
+    utils::{cei::async_task, open_path},
 };
 
 struct Demo;
