@@ -1,3 +1,5 @@
-#getrandom wasm dependencies
 [target.'cfg(target_family = "wasm")']
-rustflags = ["--cfg", "getrandom_backend=\"wasm_js\""]
+rustflags = [
+    "--cfg",
+    "getrandom_backend=\"wasm_js\"",
+] #getrandom wasm dependencies

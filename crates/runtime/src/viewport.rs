@@ -207,13 +207,8 @@ impl eframe::App for Viewport {
                             ));
                     }
                 }
-                #[allow(unused_mut)]
-                let mut strip_builder = egui_extras::StripBuilder::new(ui);
-                #[cfg(not(target_family = "wasm"))]
-                {
-                    strip_builder = strip_builder.size(egui_extras::Size::exact(32.));
-                }
-                strip_builder
+                egui_extras::StripBuilder::new(ui)
+                    .size(egui_extras::Size::exact(32.))
                     .size(egui_extras::Size::remainder())
                     .size(egui_extras::Size::exact(24.))
                     .vertical(|mut strip| {

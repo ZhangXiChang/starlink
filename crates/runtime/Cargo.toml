@@ -7,8 +7,8 @@ edition = "2024"
 embed-resource = "3.0.3"
 
 [dependencies]
-plugin-interface = { path = "../plugin-interface" }
-starlink = { path = "../starlink" }
+#plugin-interface = { path = "../plugin-interface" }
+#starlink = { path = "../starlink" }
 
 anyhow = "1.0.98"
 log = "0.4.27"
@@ -26,17 +26,15 @@ tokio = { version = "1.45.1", features = [
     "fs",
     "io-util",
 ] }
-libloading = "0.8.8"
 image = "0.25.6"
 opener = "0.8.2"
 uuid = { version = "1.17.0", features = ["v4"] }
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-#uuid wasm dependencies
-getrandom = { version = "0.3.3", features = ["wasm_js"] }
-
+getrandom = { version = "0.3.3", features = [
+    "wasm_js",
+] } #uuid wasm dependencies
 wasm-bindgen-futures = "0.4.50"
 web-sys = { version = "0.3.77", features = ["HtmlCanvasElement"] }
 gloo = "0.11.0"
 uuid = { version = "1.17.0", features = ["v4", "rng-getrandom"] }
-tokio = { version = "1.45.1", features = ["parking_lot", "sync"] }

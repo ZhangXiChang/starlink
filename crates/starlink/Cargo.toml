@@ -17,7 +17,7 @@ iroh = { version = "0.35.0", features = [
 iroh-blobs = "0.35.0"
 
 [target.'cfg(target_family = "wasm")'.dependencies]
-#iroh wasm dependencies
-getrandom = { version = "0.3.3", features = ["wasm_js"] }
-
+getrandom = { version = "0.3.3", features = [
+    "wasm_js",
+] } #iroh wasm dependencies
 iroh = "0.35.0"
