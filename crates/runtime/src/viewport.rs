@@ -3,7 +3,7 @@ use eframe::egui;
 use egui_notify::Toasts;
 use uuid::Uuid;
 
-use crate::utils::{cei::async_task, open_by_os};
+use crate::utils::{async_task, open_by_os};
 
 trait WindowViewport {
     fn update(&mut self, ui: &mut egui::Ui);
@@ -230,9 +230,13 @@ async fn set_font(ctx: egui::Context) {
         }
         #[cfg(target_family = "wasm")]
         {
-            use crate::utils::load_resource;
+            use gloo::net::http::Request;
 
-            font = load_resource("./assets/fonts/SourceHanSansCN-Bold.otf").await?;
+            font = Request::get("./assets/fonts/SourceHanSansCN-Bold.otf")
+                .send()
+                .await?
+                .binary()
+                .await?;
         }
         let mut font_definitions = egui::FontDefinitions::default();
         font_definitions.font_data.insert(

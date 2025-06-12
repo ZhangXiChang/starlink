@@ -13,7 +13,7 @@ embed-resource = "3.0.3"
 anyhow = "1.0.98"
 log = "0.4.27"
 parking_lot = "0.12.4"
-eframe = { version = "0.31.1", features = ["wgpu"] }
+eframe = { version = "0.31.1", features = ["wgpu", "android-native-activity"] }
 egui_extras = { version = "0.31.1", features = ["all_loaders"] }
 egui-notify = "0.19.0"
 
@@ -23,8 +23,6 @@ tokio = { version = "1.45.1", features = [
     "parking_lot",
     "macros",
     "rt-multi-thread",
-    "fs",
-    "io-util",
 ] }
 image = "0.25.6"
 opener = "0.8.2"
