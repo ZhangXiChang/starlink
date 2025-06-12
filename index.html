@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./assets/images/app_icon.png" type="image/x-icon">
+    <title>加载中...</title>
+    <style>
+        body {
+            margin: 0px;
+        }
+
+        #viewport {
+            display: block;
+            height: 100vh;
+            width: 100vw;
+        }
+    </style>
+
+    
+<script type="module">
+import init, * as bindings from './runtime-88db66aa8dd38dd5.js';
+const wasm = await init({ module_or_path: './runtime-88db66aa8dd38dd5_bg.wasm' });
+
+
+window.wasmBindings = bindings;
+
+
+dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
+
+</script>
+    
+<link rel="modulepreload" href="./runtime-88db66aa8dd38dd5.js" crossorigin="anonymous"><link rel="preload" href="./runtime-88db66aa8dd38dd5_bg.wasm" crossorigin="anonymous" as="fetch" type="application/wasm"></head>
+
+<body>
+    <canvas id="viewport" />
+</body>
+
+</html>
