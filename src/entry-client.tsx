@@ -1,4 +1,6 @@
 //@refresh reload
 import { mount, StartClient } from "@solidjs/start/client";
 
-mount(() => <StartClient />, document.body);
+const app = document.getElementById("app");
+if (!app) throw new Error("没有ID为app的Element");
+mount(() => <StartClient />, app);
