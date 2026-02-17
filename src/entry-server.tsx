@@ -16,7 +16,9 @@ export default createHandler(() => (
           {assets}
           {scripts}
         </head>
-        <body>{children}</body>
+        <body>
+          <div id="app">{children}</div>
+        </body>
       </html>
     )}
   />
