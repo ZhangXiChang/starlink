@@ -1,209 +1,138 @@
-# Agent Guidelines for Pupu Project
+# Agent Guide for Pupu
 
-This document provides guidelines for AI agents working on the Pupu codebase. It covers build commands, linting, testing, code style, and project conventions.
+This document provides essential information for AI agents working on the Pupu codebase. Pupu is a multi-platform application built with Rust (backend, WebAssembly), SolidJS (frontend), Tauri (native/Android), and Cloudflare Workers (web). The project uses Bun as the primary package manager and uv for Python scripts.
 
 ## Build Commands
 
-### Prerequisites
+### Web Development
+- `bun run dev` – Start the development server with hot reload
+- `bun run build` – Build the web application (runs checks first)
+- `bun run preview` – Preview the built application with Wrangler dev server
+- `bun run wasm:build` – Build the WebAssembly endpoint (`wasm/endpoint`)
 
-- [Bun](https://bun.sh) (JavaScript runtime)
-- [Rust](https://rust-lang.org) (with `wasm32-unknown-unknown` target)
-- [wasm-pack](https://rustwasm.github.io/wasm-pack/)
-- [Tauri prerequisites](https://v2.tauri.app/start/prerequisites)
-- [uv](https://docs.astral.sh/uv/) (Python tool)
-- [Android SDK](https://developer.android.com/studio) (for Android builds)
+### Native Development (Tauri)
+- `bun run native:dev` – Start Tauri development environment
+- `bun run native:build` – Build the native executable for the current platform
 
-### Initialization
+### Android Development
+- `bun run android:init` – Initialize Android project (requires Android SDK)
+- `bun run android:dev` – Start Android development environment
+- `bun run android:build` – Build Android APK (arm64)
 
-```bash
-bun run install:pre   # Build WASM endpoint
-bun install           # Install npm dependencies
-bun run install:post  # Generate icons, IPC bindings, database schema, install Playwright
-```
+### Rust Workspace
+- `cargo build` – Build all Rust crates
+- `cargo build -p <crate>` – Build a specific crate (e.g., `cargo build -p endpoint`)
+- `cargo test` – Run unit tests for all crates
+- `cargo test -p <crate>` – Run tests for a specific crate
+- `cargo test -p <crate> -- <test_name>` – Run a specific test (supports wildcards)
+- `cargo clippy` – Run Clippy lints (no custom configuration)
+- `cargo fmt` – Format Rust code with rustfmt (no custom configuration)
 
-### Development
+### Database & Code Generation
+- `bun run generate:db-schema` – Generate Prisma schema and push to database
+- `bun run generate:icon` – Generate Tauri icon from SVG
+- `bun run generate:ipc-bindings` – Generate IPC bindings (requires Rust)
 
-```bash
-# Web development
-bun run dev
-
-# Native desktop development (Tauri)
-bun run native:dev
-
-# Android development
-bun run android:dev
-```
-
-### Production Builds
-
-```bash
-# Web
-bun run build
-
-# Native desktop
-bun run native:build
-
-# Android APK
-bun run android:build
-```
-
-### Web Preview
-
-```bash
-bun run preview   # Runs wrangler dev on Cloudflare Workers
-```
-
-### WASM Build
-
-```bash
-bun run wasm:build
-```
-
-## Linting and Testing
+## Lint & Test Commands
 
 ### TypeScript/JavaScript
+- `bun run check` – Run all checks (TypeScript and ESLint)
+- `bun run check:tsc` – TypeScript type checking only
+- `bun run check:eslint` – ESLint linting only (configuration in `eslint.config.ts`)
+- `bun run test` – Run Playwright end‑to‑end tests (requires dev server)
+- `bun test` – Run unit tests with Bun’s test runner (if any)
 
-```bash
-# Type checking and ESLint
-bun run check
-
-# Run Playwright end‑to‑end tests
-bun run test
-
-# Run a single Playwright test file
-bun run test tests/auth.test.ts
-
-# Run tests matching a title pattern
-bun run test -- --grep "登录表单验证"
-```
+### Playwright E2E Tests
+- `bun run test` – Runs all tests defined in `tests/`
+- `bun run test -- --grep "pattern"` – Run tests matching a pattern
+- `bun run playwright:install` – Install Playwright browsers
 
 ### Rust
-
-```bash
-# Format check
-cargo fmt --check
-
-# Linting with Clippy
-cargo clippy --workspace
-
-# Run all Rust unit tests
-cargo test --workspace
-
-# Run tests for a specific crate
-cargo test -p utils
-
-# Build in release mode
-cargo build --release
-```
+- `cargo clippy` – Lint with Clippy (default settings)
+- `cargo fmt --check` – Check formatting without modifying files
 
 ## Code Style Guidelines
 
-### Naming Conventions
-
-- **Functions and variables**: `snake_case` (applies to both Rust and TypeScript)
-- **Class names**: `PascalCase`
-- **Interface/trait names**: `PascalCase`
-- **Module names**: `snake_case`
-- **Constants**: `SCREAMING_SNAKE_CASE`
-- **Type parameters**: `T`, `U`, `V` or descriptive camelCase (`TResult`)
-
 ### TypeScript / SolidJS
-
-- Use strict TypeScript (`strict: true` in tsconfig.json)
-- No unused locals or parameters (`noUnusedLocals`, `noUnusedParameters`)
-- Use `type` imports for type‑only imports:
-  ```ts
-  import type { Person } from "~/lib/endpoint/types";
-  import { createSignal } from "solid‑js";
-  ```
-- Prefer `async`/`await` over raw promises
-- Use `Uint8Array` for binary data
-- Use `bigint` for large integers (matching Rust `i64`/`u64`)
-- Use `snake_case` for method names and properties (matching Rust IPC)
-- Class methods that return promises should be marked `async`
-- Use SolidJS reactive primitives (`createSignal`, `createEffect`, `createMemo`)
+- **Naming**: Use `camelCase` for variables, functions, and methods. Use `PascalCase` for components, classes, types, and interfaces. Use `SCREAMING_SNAKE_CASE` for constants.
+- **Imports**: Group imports in the following order:
+  1. External dependencies (Solid, router, etc.)
+  2. Internal modules (`~/components/...`)
+  3. Type imports (use `import type` for types)
+- **Error Handling**: Prefer `try/catch` with async/await. Use `Result`‑like patterns from libraries where appropriate.
+- **Types**: Always use strict TypeScript (`strict: true`). Avoid `any`. Use `unknown` or proper generics.
+- **Formatting**: Prettier is configured with default settings (see `.prettierrc`). Run `bun run check:eslint` to enforce code style.
+- **ESLint Rules**: Key rules from `eslint.config.ts`:
+  - `@typescript-eslint/strict-boolean-expressions`: error
+  - `@typescript-eslint/no-misused-promises`: off
+  - `no-unassigned-vars`: off
 
 ### Rust
-
-- Edition 2024
-- Use `eyre::Result` for internal error handling
-- Convert to `Result<T, String>` for IPC via the `.mse()` extension
-- Use `serde_json::Value` for JSON values crossing the IPC boundary
-- Derive `Serialize`/`Deserialize` with `serde` for IPC types
-- Use `taurpc` procedural macros for defining IPC endpoints
-- Use `#[derive(Default)]` where appropriate
-- Use `Arc<Slab<...>>` for handle‑based resource pools
-- Use `tokio` for async runtime
-
-### Imports Organization
-
-1. Standard library / external crates
-2. Internal modules
-3. Type‑only imports
-4. Relative imports
-
-Example:
-
-```rust
-use std::sync::Arc;
-use eyre::eyre;
-use tauri::{Runtime, Window};
-use crate::error::MapStringError;
-```
-
-### Error Handling
-
-- **Rust**: Use `eyre::Result` and `eyre!` macro for internal errors. Convert to `String` with `.mse()` when returning over IPC.
-- **TypeScript**: Use `try`/`catch` with `async` functions. Throw `Error` objects.
-- **Playwright tests**: Use `expect` assertions; failures are reported as test failures.
-
-### Project Structure
-
-```
-pupu/
-├── Cargo.toml (workspace)
-├── package.json
-├── src/ (TypeScript frontend – SolidJS)
-├── native/ (Tauri backend)
-├── wasm/endpoint/ (Rust WebAssembly)
-├── crates/ (shared Rust libraries)
-├── cli/ (standalone relay binary)
-├── tests/ (Playwright end‑to‑end tests)
-├── public/ (static assets)
-├── scripts/ (Python utilities)
-└── docs/ (project documentation)
-```
+- **Naming**: Follow `snake_case` for functions, variables, and modules. Use `PascalCase` for types, traits, and enums. Use `SCREAMING_SNAKE_CASE` for constants.
+- **Imports**: Group imports as per `rustfmt` defaults. Use `crate::` for internal modules.
+- **Error Handling**: Use `eyre::Result` for fallible functions. Propagate errors with `?`. Provide context with `wrap_err`.
+- **Formatting**: Use `cargo fmt` (no project‑specific `rustfmt.toml`). Ensure code passes `cargo fmt --check`.
+- **Linting**: Run `cargo clippy` and address all warnings. No custom Clippy configuration.
+- **Documentation**: Document public APIs with `///` doc comments.
 
 ### Commit Messages
+- Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.
+- Common types: `fix:`, `feat:`, `docs:`, `chore:`.
+- Use present tense, imperative mood (e.g., “Add feature” not “Added feature”).
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+## Editor & Tooling Notes
+- No Cursor rules (`.cursorrules` or `.cursor/rules/`) are present.
+- No Copilot instructions (`.github/copilot-instructions.md`) are present.
+- ESLint and Prettier are configured as described above.
 
-- `fix:` for bug fixes
-- `feat:` for new features
-- `docs:` for documentation changes
-- `chore:` for maintenance tasks
+## Project Structure
+```
+pupu/
+├── src/                    # Frontend SolidJS source
+│   ├── routes/            # Route components (file‑based routing)
+│   ├── components/        # Reusable UI components
+│   ├── stores/            # State management stores
+│   └── lib/               # Internal libraries (endpoint, SQLite, etc.)
+├── crates/                # Rust crates (shared logic)
+│   ├── endpoint/          # Endpoint abstraction
+│   ├── person‑protocol/   # Person protocol implementation
+│   └── utils/             # Utility helpers
+├── wasm/endpoint/         # WebAssembly build target
+├── native/                # Tauri native application
+├── cli/pupu‑relay/        # Relay CLI tool
+├── tests/                 # Playwright end‑to‑end tests
+└── .github/               CI/CD workflows and actions
+```
 
-### Key Technologies
+## Environment Setup
+1. Install prerequisites: Tauri, Bun, uv, `wasm32‑unknown‑unknown` target, wasm‑pack.
+2. Run `bun run install:pre` (builds WASM).
+3. Run `bun install` (installs Node dependencies).
+4. Run `bun run install:post` (runs generation tasks and installs Playwright browsers).
+5. For Android development, also run `bun run android:init` and set up keystore.
 
-- **Database**: Prisma for schema definition, Kysely for type‑safe SQL queries, SQLite via `tokio‑rusqlite`
-- **IPC**: Tauri‑RPC with `#[taurpc::procedures]` traits, `#[taurpc::resolvers]` implementations, TypeScript bindings via `export_config`
-- **WebAssembly**: Built with `wasm‑pack`, imported as `@pupu/endpoint`, functions exposed via `#[wasm_bindgen]`
-- **Android**: Keystore in `keystore.properties`, build with `tauri android build`, icons from `public/icon.svg`
+## CI/CD Notes
+- The repository uses GitHub Actions for testing and releases (see `.github/workflows/`).
+- The `initialize‑project` action sets up the environment (Rust target, Bun, uv, system dependencies).
+- Web releases deploy to Cloudflare Workers via Wrangler.
+- Native releases build Windows, Android, and relay binaries.
 
-### Editor / Tooling
+## Useful References
+- `package.json` – Scripts and dependencies
+- `wrangler.json` – Cloudflare Workers configuration
+- `playwright.config.ts` – Playwright test configuration
+- `tsconfig.json` – TypeScript compiler options
+- `eslint.config.ts` – ESLint configuration
+- `.prettierrc` – Prettier configuration (defaults)
+- `Cargo.toml` (workspace) – Rust crate layout
 
-- No Cursor rules (`.cursorrules`) or Copilot instructions (`.github/copilot-instructions.md`) are present.
+## Quick Start for Agents
+1. Always run `bun run check` before committing changes.
+2. For Rust changes, run `cargo fmt` and `cargo clippy`.
+3. For frontend changes, ensure TypeScript passes and ESLint passes.
+4. Write tests for new features (unit tests with Bun, E2E with Playwright).
+5. Follow existing naming and import patterns in the codebase.
+6. Use conventional commits for any commit messages.
 
-## Quick Reference
-
-| Task             | Command                                   |
-| ---------------- | ----------------------------------------- |
-| Type check       | `bun run check`                           |
-| Run all tests    | `bun run test` & `cargo test --workspace` |
-| Lint Rust        | `cargo clippy --workspace`                |
-| Format Rust      | `cargo fmt`                               |
-| Start web dev    | `bun run dev`                             |
-| Start native dev | `bun run native:dev`                      |
-| Build web        | `bun run build`                           |
-| Build native     | `bun run native:build`                    |
-| Build Android    | `bun run android:build`                   |
+---
+*This file is maintained for AI agents working on the Pupu repository. Update it when tooling or conventions change.*
