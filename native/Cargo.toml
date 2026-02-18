@@ -18,7 +18,7 @@ person-protocol = { path = "../crates/person-protocol" }
 
 tauri = { version = "2.10.2", features = ["test"] }
 serde_json = "1.0.149"
-taurpc = { git = "https://github.com/zhangxichang/TauRPC", branch = "fix/android-debugging-issues" }
+taurpc = "0.7.1"
 specta = { version = "2.0.0-rc.22", features = ["serde_json"] }
 specta-typescript = "0.0.9"
 tauri-plugin-prevent-default = { version = "4.0.3", features = [
