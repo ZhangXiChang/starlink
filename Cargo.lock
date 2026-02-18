@@ -6881,8 +6881,9 @@ dependencies = [
 
 [[package]]
 name = "taurpc"
-version = "0.6.0"
-source = "git+https://github.com/zhangxichang/TauRPC?branch=fix%2Fandroid-debugging-issues#9a321a17064ff47ac41947725cb51f05847e9b60"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3339e477afbfb3ec93bb5d949cfbc25871688135a778132fc62b913ccd214a06"
 dependencies = [
  "anyhow",
  "heck 0.5.0",
@@ -6900,8 +6901,9 @@ dependencies = [
 
 [[package]]
 name = "taurpc-macros"
-version = "0.6.0"
-source = "git+https://github.com/zhangxichang/TauRPC?branch=fix%2Fandroid-debugging-issues#9a321a17064ff47ac41947725cb51f05847e9b60"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "658ca070592e4116466bdc1712db15245d13f8c9b9cac9af9b5cef032cc5c41b"
 dependencies = [
  "proc-macro2",
  "quote",
