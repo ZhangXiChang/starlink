@@ -5,7 +5,7 @@ import FriendList from "~/components/ui/friend_list";
 import SidebarButtonGroup, {
   type SidebarButtonGroupState,
 } from "~/components/ui/sidebar_button_group";
-import Userbar from "~/components/ui/userbar";
+import Userbar from "~/components/ui/user_bar";
 import { HomeStore } from "~/stores/home";
 
 export default function Home() {
