@@ -25,10 +25,15 @@ export default function MenuBar() {
           import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
         )}
       >
-        <ul class="menu menu-horizontal">
-          <li>
+        <ul class="menu menu-horizontal join">
+          <li class="join-item">
+            <button class="join-item btn btn-sm bg-base-100" onClick={() => {}}>
+              设置
+            </button>
+          </li>
+          <li class="join-item">
             <button
-              class="btn btn-sm bg-base-100"
+              class="join-item btn btn-sm bg-base-100"
               onClick={() => {
                 about_dialog_ref?.showModal();
                 set_lazy_about_modal_load(true);
