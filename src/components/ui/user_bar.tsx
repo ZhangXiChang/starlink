@@ -3,7 +3,7 @@ import { QueryBuilder } from "~/lib/query_builder";
 import { MainContext, use_context } from "../context";
 import type { Person } from "~/lib/endpoint/types";
 import { createSignal, onMount, Show } from "solid-js";
-import { ChevronsLeftRightIcon, UserIcon } from "lucide-solid";
+import { ChevronsLeftRightIcon, SettingsIcon, UserIcon } from "lucide-solid";
 import Image from "../widgets/image";
 import UserInfoWindow from "./user_info_window";
 import { animate } from "animejs";
@@ -36,7 +36,7 @@ export default function Userbar() {
   return (
     <div
       ref={userbar_ref}
-      class="absolute left-2 bottom-2 bg-base-100 border border-base-300 rounded-box flex p-2 gap-2"
+      class="absolute left-2 bottom-6 bg-base-100 border border-base-300 rounded-box flex p-2 gap-2"
     >
       <div class="avatar">
         <Show
@@ -63,6 +63,9 @@ export default function Userbar() {
           user_person={user_person()}
         />
       </Show>
+      <button class="btn btn-square btn-ghost">
+        <SettingsIcon />
+      </button>
       <button
         class="btn btn-square btn-ghost"
         onClick={() => {

@@ -31,6 +31,14 @@ export default function FriendList() {
   });
   return (
     <>
+      <dialog ref={add_friend_dialog_ref} class="modal" closedby="any">
+        <Show when={lazy_add_friend_modal_load()}>
+          <LazyAddFriendModal />
+          <form method="dialog" class="modal-backdrop">
+            <button />
+          </form>
+        </Show>
+      </dialog>
       <div class="flex border-b border-base-300 p-2">
         <div class="flex gap-1 border-r border-base-300 pr-2 items-center">
           <UserIcon />
@@ -50,14 +58,6 @@ export default function FriendList() {
               <UserPlusIcon class="size-4" />
             </button>
           </div>
-          <dialog ref={add_friend_dialog_ref} class="modal" closedby="any">
-            <Show when={lazy_add_friend_modal_load()}>
-              <LazyAddFriendModal />
-              <form method="dialog" class="modal-backdrop">
-                <button />
-              </form>
-            </Show>
-          </dialog>
         </div>
       </div>
       <Suspense>

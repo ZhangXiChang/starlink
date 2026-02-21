@@ -10,25 +10,7 @@ export default function MenuBar() {
   const [lazy_about_modal_load, set_lazy_about_modal_load] =
     createSignal(false);
   return (
-    <div
-      class={twMerge(
-        "flex items-start",
-        import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
-      )}
-    >
-      <ul class="menu menu-horizontal">
-        <li>
-          <button
-            class="btn btn-sm bg-base-100"
-            onClick={() => {
-              about_dialog_ref?.showModal();
-              set_lazy_about_modal_load(true);
-            }}
-          >
-            关于
-          </button>
-        </li>
-      </ul>
+    <>
       <dialog ref={about_dialog_ref} class="modal" closedby="any">
         <Show when={lazy_about_modal_load()}>
           <LazyAboutModal />
@@ -37,11 +19,31 @@ export default function MenuBar() {
           </form>
         </Show>
       </dialog>
-      <Show when={import.meta.env.TAURI_ENV_PLATFORM !== "android"}>
-        <Show keyed when={get_window()}>
-          {(v) => <WindowControlBar window={v} />}
+      <div
+        class={twMerge(
+          "flex items-start",
+          import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
+        )}
+      >
+        <ul class="menu menu-horizontal">
+          <li>
+            <button
+              class="btn btn-sm bg-base-100"
+              onClick={() => {
+                about_dialog_ref?.showModal();
+                set_lazy_about_modal_load(true);
+              }}
+            >
+              关于
+            </button>
+          </li>
+        </ul>
+        <Show when={import.meta.env.TAURI_ENV_PLATFORM !== "android"}>
+          <Show keyed when={get_window()}>
+            {(v) => <WindowControlBar window={v} />}
+          </Show>
         </Show>
-      </Show>
-    </div>
+      </div>
+    </>
   );
 }
