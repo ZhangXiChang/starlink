@@ -17,7 +17,9 @@ arg_parser.add_argument("path", help="keystore.properties文件路径")
 arg = arg_parser.parse_args()
 
 if not path.exists(arg.path):
-    print(f"{arg.path}文件不存在，请创建在项目根目录{arg.path}文件填写storeFile、keyAlias、password参数")
+    print(
+        f"{arg.path}文件不存在，请创建在项目根目录{arg.path}文件填写storeFile、keyAlias、password参数"
+    )
     exit(-1)
 copyfile(arg.path, "native/gen/android/keystore.properties")
 
