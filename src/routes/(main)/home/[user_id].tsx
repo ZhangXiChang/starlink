@@ -5,8 +5,9 @@ import FriendList from "~/components/ui/friend_list";
 import SidebarButtonGroup, {
   type SidebarButtonGroupState,
 } from "~/components/ui/sidebar_button_group";
-import Userbar from "~/components/ui/user_bar";
 import { HomeStore } from "~/stores/home";
+
+//打算在按钮组上面，顶栏下面，添加用户Avator，用户点击Avator可以显示自己的信息
 
 export default function Home() {
   const params = useParams<{ user_id: string }>();
@@ -49,7 +50,6 @@ export default function Home() {
                 </div>
               </Show>
             </div>
-            <Userbar />
           </HomeContext.Provider>
         );
       }}

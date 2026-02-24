@@ -4,10 +4,14 @@ import { get_window } from "~/lib/window";
 import { twMerge } from "tailwind-merge";
 
 const LazyAboutModal = lazy(() => import("~/components/modal/about"));
+const LazySettingModal = lazy(() => import("~/components/modal/setting"));
 
 export default function MenuBar() {
   let about_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_about_modal_load, set_lazy_about_modal_load] =
+    createSignal(false);
+  let setting_dialog_ref: HTMLDialogElement | undefined;
+  const [lazy_setting_modal_load, set_lazy_setting_modal_load] =
     createSignal(false);
   return (
     <>
@@ -19,22 +23,41 @@ export default function MenuBar() {
           </form>
         </Show>
       </dialog>
+      <dialog ref={setting_dialog_ref} class="modal" closedby="any">
+        <Show when={lazy_setting_modal_load()}>
+          <LazySettingModal />
+          <form method="dialog" class="modal-backdrop">
+            <button />
+          </form>
+        </Show>
+      </dialog>
       <div
         class={twMerge(
           "flex items-start",
           import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
         )}
       >
-        <ul class="menu menu-horizontal">
-          <li>
+        <ul class="menu menu-horizontal join">
+          <li class="join-item">
             <button
-              class="btn btn-sm bg-base-100"
+              class="join-item btn btn-sm bg-base-100"
               onClick={() => {
                 about_dialog_ref?.showModal();
                 set_lazy_about_modal_load(true);
               }}
             >
               关于
+            </button>
+          </li>
+          <li class="join-item">
+            <button
+              class="join-item btn btn-sm bg-base-100"
+              onClick={() => {
+                setting_dialog_ref?.showModal();
+                set_lazy_setting_modal_load(true);
+              }}
+            >
+              设置
             </button>
           </li>
         </ul>
