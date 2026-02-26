@@ -9,7 +9,7 @@
     "generate:ipc-bindings": "cargo run --bin generate_ipc_bindings",
     "install:pre": "bun run wasm:build",
     "install:post": "run-p 'generate:*' playwright:install",
-    "check": "run-p 'check:*'",
+    "check": "run-s 'check:*'",
     "dev": "vinxi dev",
     "build": "bun run check && vinxi build",
     "preview": "wrangler dev",

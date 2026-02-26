@@ -1,21 +1,31 @@
-import { createSignal } from "solid-js";
+import { createSignal, Show } from "solid-js";
 import { HomeContext, use_context } from "../context";
 import type { Person } from "~/lib/endpoint/types";
+import { SendIcon, UserIcon } from "lucide-solid";
+import Image from "../widgets/image";
+import { tryit } from "radash";
 
 export default function AddFriend() {
   const home_store = use_context(HomeContext);
   let search_user_id_input_ref: HTMLInputElement | undefined;
-  const [search_user_result, set_search_user_result] = createSignal<Person>();
+  const [search_user_result, set_search_user_result] = createSignal<
+    Person & { id: string }
+  >();
+  const [
+    send_friend_request_button_disabled,
+    set_send_friend_request_button_disabled,
+  ] = createSignal(false);
   const on_search_user = async () => {
     if (
       search_user_id_input_ref !== undefined &&
       search_user_id_input_ref.value != ""
     ) {
-      set_search_user_result(
-        await home_store.endpoint.request_person(
+      set_search_user_result({
+        id: search_user_id_input_ref.value,
+        ...(await home_store.endpoint.request_person(
           search_user_id_input_ref.value,
-        ),
-      );
+        )),
+      });
     }
   };
   return (
@@ -41,7 +51,55 @@ export default function AddFriend() {
             </button>
           </div>
         </div>
-        <div>{search_user_result()?.name}</div>
+        <Show when={search_user_result()}>
+          {(v) => (
+            <div class="flex p-2 gap-3 items-center">
+              <div class="avatar">
+                <Show
+                  keyed
+                  when={v().avatar}
+                  fallback={
+                    <UserIcon class="size-12 rounded-full bg-base-300" />
+                  }
+                >
+                  {(v) => <Image class="size-12 rounded-full" image={v} />}
+                </Show>
+              </div>
+              <div class="flex flex-col">
+                <span class="font-bold">{v().name}</span>
+                <span class="text-sm text-base-content/60">{v().bio}</span>
+              </div>
+              <div class="flex-1 flex justify-end">
+                <div class="tooltip tooltip-left" data-tip="发送好友请求">
+                  <button
+                    disabled={send_friend_request_button_disabled()}
+                    class="btn btn-square btn-sm"
+                    onClick={() => {
+                      set_send_friend_request_button_disabled(true);
+                      void (async () => {
+                        const [err, agree] = await tryit(() =>
+                          home_store.endpoint.request_friend(v().id),
+                        )();
+                        if (err) {
+                          console.error(err);
+                        } else {
+                          if (agree) {
+                            console.info("对方同意好友请求");
+                          } else {
+                            console.error("对方拒绝好友请求");
+                          }
+                        }
+                        set_send_friend_request_button_disabled(false);
+                      })();
+                    }}
+                  >
+                    <SendIcon class="size-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </Show>
       </div>
     </div>
   );
