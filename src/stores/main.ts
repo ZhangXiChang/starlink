@@ -3,7 +3,7 @@ import type { EndpointModule } from "~/lib/endpoint/interface";
 import { SQLiteModuleAdapter } from "~/lib/sqlite";
 import type { SQLite, SQLiteModule } from "~/lib/sqlite/interface";
 import type { Store } from "./interface";
-import { Toaster } from "~/lib/toast";
+import { Toaster } from "~/lib/toaster";
 
 export class MainStore implements Store {
   sqlite_module: SQLiteModule;
