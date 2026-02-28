@@ -5,6 +5,7 @@ import { ShellContext } from "./components/context";
 import MenuBar from "./components/ui/menu_bar";
 import Loading from "./components/widgets/loading";
 import Error from "./components/widgets/error";
+import { twMerge } from "tailwind-merge";
 
 export function Shell(props: RouteSectionProps) {
   const store = ShellStore.new();
@@ -24,7 +25,19 @@ export function Shell(props: RouteSectionProps) {
         </div>
         <div class="toast">
           <For each={store.toaster.items}>
-            {(v) => <div class={`alert alert-${v.level}`}>{v.content}</div>}
+            {(v) => {
+              const level_style = {
+                info: "alert-info",
+                success: "alert-success",
+                warning: "alert-warning",
+                error: "alert-error",
+              }[v.level];
+              return (
+                <div class={`${twMerge("alert", level_style)}`}>
+                  {v.content}
+                </div>
+              );
+            }}
           </For>
         </div>
       </div>

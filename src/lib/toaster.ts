@@ -2,18 +2,18 @@ import { createStore, produce } from "solid-js/store";
 import { uid } from "radash";
 import type { JSX } from "solid-js";
 
-export type ToastLevel = "info" | "success" | "warning" | "error";
-export type Toast = {
-  id: string;
-  level: ToastLevel;
-  content: JSX.Element;
-};
-
 const DEFAULT_DURATION = {
   info: 3000,
   success: 2000,
   warning: 4000,
   error: 5000,
+};
+
+export type ToastLevel = "info" | "success" | "warning" | "error";
+export type Toast = {
+  id: string;
+  level: ToastLevel;
+  content: JSX.Element;
 };
 
 export class Toaster {
