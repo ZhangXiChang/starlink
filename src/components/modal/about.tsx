@@ -73,7 +73,7 @@ export default function AboutModal() {
           </span>
           <Show when={import.meta.env.TAURI_ENV_PLATFORM !== undefined}>
             <span class="text-sm text-base-content/60">
-              版本号：{version() ?? "开发版本"}
+              版本号: {version() ?? "开发版本"}
             </span>
           </Show>
         </div>
