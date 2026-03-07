@@ -6,17 +6,17 @@ edition = "2024"
 [dependencies]
 eyre = "0.6.12"
 log = "0.4.29"
-env_logger = "0.11.8"
-tokio = { version = "1.49.0", features = [
+env_logger = "0.11.9"
+tokio = { version = "1.50.0", features = [
     "parking_lot",
     "macros",
     "rt-multi-thread",
     "fs",
 ] }
-clap = { version = "4.5.57", features = ["derive"] }
+clap = { version = "4.5.60", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "0.9.8"
-iroh-relay = { version = "0.96.0", features = ["server"] }
-rustls = { version = "0.23.36", default-features = false }
+iroh-relay = { version = "0.96.1", features = ["server"] }
+rustls = { version = "0.23.37", default-features = false }
 rustls-cert-file-reader = "0.4.2"
 rustls-cert-reloadable-resolver = "0.7.1"

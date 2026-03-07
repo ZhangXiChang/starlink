@@ -5,7 +5,7 @@ export default defineConfig({
   reporter: "html",
   webServer: {
     command: "bun run preview",
-    url: "http://127.0.0.1:8787",
+    url: "http://localhost:8787",
   },
   projects: [
     {
