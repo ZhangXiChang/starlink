@@ -6,7 +6,7 @@
     "enabled": true
   },
   "name": "pupu",
-  "compatibility_date": "2026-01-21",
+  "compatibility_date": "2024-12-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": ".output/server/index.mjs",
   "assets": {
