@@ -1,6 +1,6 @@
 import { useIsRouting, type RouteSectionProps } from "@solidjs/router";
 import { ShellStore } from "./stores/shell";
-import { ErrorBoundary, For, onCleanup, Show, Suspense } from "solid-js";
+import { ErrorBoundary, For, Show, Suspense } from "solid-js";
 import { ShellContext } from "./components/context";
 import MenuBar from "./components/ui/menu_bar";
 import Loading from "./components/widgets/loading";
@@ -10,7 +10,6 @@ import { twMerge } from "tailwind-merge";
 export function Shell(props: RouteSectionProps) {
   const store = ShellStore.new();
   const is_routing = useIsRouting();
-  onCleanup(() => store.cleanup());
   return (
     <ShellContext.Provider value={store}>
       <div class="absolute w-dvw h-dvh flex flex-col bg-base-200">
