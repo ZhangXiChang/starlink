@@ -1,10 +1,9 @@
 import type { Endpoint } from "~/lib/endpoint/interface";
 import type { MainStore } from "./main";
-import type { Store } from "./interface";
 import { QueryBuilder } from "~/lib/query_builder";
 import type { Person } from "~/lib/endpoint/types";
 
-export class HomeStore implements Store {
+export class HomeStore {
   endpoint: Endpoint;
 
   private constructor(endpoint: Endpoint) {

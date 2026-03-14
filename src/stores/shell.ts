@@ -1,7 +1,6 @@
 import { Toaster } from "~/lib/toaster";
-import type { Store } from "./interface";
 
-export class ShellStore implements Store {
+export class ShellStore {
   toaster: Toaster;
 
   private constructor(toaster: Toaster) {
@@ -10,5 +9,4 @@ export class ShellStore implements Store {
   static new() {
     return new ShellStore(new Toaster());
   }
-  async cleanup() {}
 }
