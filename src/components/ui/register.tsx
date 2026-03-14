@@ -59,10 +59,15 @@ export default function Register() {
                     keyed
                     when={field().state.value}
                     fallback={
-                      <UserIcon class="size-12 rounded-full bg-base-300" />
+                      <UserIcon class="size-12 rounded-full bg-base-300 hover:outline outline-neutral-300" />
                     }
                   >
-                    {(v) => <Image class="size-12 rounded-full" image={v} />}
+                    {(v) => (
+                      <Image
+                        class="size-12 rounded-full hover:outline outline-neutral-300"
+                        image={v}
+                      />
+                    )}
                   </Show>
                 </div>
                 <input

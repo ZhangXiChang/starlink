@@ -15,27 +15,32 @@ export default function WindowControlBar(props: { window: Window }) {
     onCleanup(async () => (await un_on_resized)());
   });
   return (
-    <div data-tauri-drag-region class="flex-1 flex justify-end">
-      <button
-        class="btn btn-square btn-ghost btn-sm rounded-none"
-        onClick={() => props.window.minimize()}
-      >
-        <Minimize2Icon class="size-4" />
-      </button>
-      <button
-        class="btn btn-square btn-ghost btn-sm rounded-none"
-        onClick={() => props.window.toggleMaximize()}
-      >
-        <Show when={is_maximized()} fallback={<MaximizeIcon class="size-4" />}>
-          <MinimizeIcon class="size-4" />
-        </Show>
-      </button>
-      <button
-        class="btn btn-square btn-ghost btn-sm rounded-none btn-error text-base-content"
-        onClick={() => props.window.close()}
-      >
-        <XIcon class="size-4" />
-      </button>
+    <div class="flex-1 flex flex-col h-full">
+      <div data-tauri-drag-region class="flex justify-end">
+        <button
+          class="btn btn-square btn-ghost btn-sm rounded-none"
+          onClick={() => props.window.minimize()}
+        >
+          <Minimize2Icon class="size-4" />
+        </button>
+        <button
+          class="btn btn-square btn-ghost btn-sm rounded-none"
+          onClick={() => props.window.toggleMaximize()}
+        >
+          <Show
+            when={is_maximized()}
+            fallback={<MaximizeIcon class="size-4" />}
+          >
+            <MinimizeIcon class="size-4" />
+          </Show>
+        </button>
+        <button
+          class="btn btn-square btn-ghost btn-sm rounded-none btn-error text-base-content"
+          onClick={() => props.window.close()}
+        >
+          <XIcon class="size-4" />
+        </button>
+      </div>
     </div>
   );
 }
