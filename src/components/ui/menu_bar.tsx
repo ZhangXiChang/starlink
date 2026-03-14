@@ -2,16 +2,25 @@ import { createSignal, lazy, Show } from "solid-js";
 import WindowControlBar from "./window_control_bar";
 import { get_window } from "~/lib/window";
 import { twMerge } from "tailwind-merge";
+import Image from "../widgets/image";
+import { ShellContext, use_context } from "../context";
+import { UserIcon } from "lucide-solid";
 
 const LazyAboutModal = lazy(() => import("~/components/modal/about"));
 const LazySettingModal = lazy(() => import("~/components/modal/setting"));
+const LazyUserInfoModal = lazy(() => import("~/components/modal/user_info"));
 
 export default function MenuBar() {
+  const shell_store = use_context(ShellContext);
+  const [user_person] = shell_store.user_person;
   let about_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_about_modal_load, set_lazy_about_modal_load] =
     createSignal(false);
   let setting_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_setting_modal_load, set_lazy_setting_modal_load] =
+    createSignal(false);
+  let user_info_dialog_ref: HTMLDialogElement | undefined;
+  const [lazy_user_info_modal_load, set_lazy_user_info_modal_load] =
     createSignal(false);
   return (
     <>
@@ -31,12 +40,46 @@ export default function MenuBar() {
           </form>
         </Show>
       </dialog>
+      <dialog ref={user_info_dialog_ref} class="modal" closedby="any">
+        <Show when={lazy_user_info_modal_load()}>
+          <LazyUserInfoModal />
+          <form method="dialog" class="modal-backdrop">
+            <button />
+          </form>
+        </Show>
+      </dialog>
       <div
         class={twMerge(
-          "flex items-start",
+          "flex items-center",
           import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
         )}
       >
+        <Show keyed when={user_person()}>
+          {(v) => (
+            <div
+              class="avatar cursor-pointer p-2 pr-0"
+              onClick={() => {
+                user_info_dialog_ref?.showModal();
+                set_lazy_user_info_modal_load(true);
+              }}
+            >
+              <Show
+                keyed
+                when={v.avatar}
+                fallback={
+                  <UserIcon class="size-10 rounded-full bg-base-300 hover:outline outline-neutral-300" />
+                }
+              >
+                {(avatar) => (
+                  <Image
+                    class="size-10 rounded-full hover:outline outline-neutral-300"
+                    image={avatar}
+                  />
+                )}
+              </Show>
+            </div>
+          )}
+        </Show>
         <ul class="menu menu-horizontal join">
           <li class="join-item">
             <button

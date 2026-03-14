@@ -1,6 +1,11 @@
 import { createAsync, useParams } from "@solidjs/router";
 import { createSignal, Match, onCleanup, Show, Switch } from "solid-js";
-import { HomeContext, MainContext, use_context } from "~/components/context";
+import {
+  HomeContext,
+  MainContext,
+  ShellContext,
+  use_context,
+} from "~/components/context";
 import FriendList from "~/components/ui/friend_list";
 import SidebarButtonGroup, {
   type SidebarButtonGroupState,
@@ -11,8 +16,11 @@ import { HomeStore } from "~/stores/home";
 
 export default function Home() {
   const params = useParams<{ user_id: string }>();
+  const shell_store = use_context(ShellContext);
   const main_store = use_context(MainContext);
-  const store = createAsync(() => HomeStore.new(main_store, params.user_id));
+  const store = createAsync(() =>
+    HomeStore.new(shell_store, main_store, params.user_id),
+  );
   const [sidebar_button_group_state, set_sidebar_button_group_state] =
     createSignal<SidebarButtonGroupState>(null);
   return (
@@ -27,7 +35,7 @@ export default function Home() {
                 聊天界面待实现
               </div>
               <Show when={sidebar_button_group_state()}>
-                <div class="absolute w-full h-full max-w-80 flex flex-col bg-base-100 border border-base-300 rounded-t-box">
+                <div class="absolute w-80 h-full flex flex-col bg-base-100 border border-base-300 rounded-t-box">
                   <Switch>
                     <Match when={sidebar_button_group_state() === "message"}>
                       <div class="flex-1 flex items-center justify-center">

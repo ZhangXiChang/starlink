@@ -6,6 +6,7 @@ import Image from "../widgets/image";
 import Loading from "../widgets/loading";
 import Error from "../widgets/error";
 import { UserIcon } from "lucide-solid";
+import Modal from "../modal";
 
 export default function AboutModal() {
   const version = createAsync(async () => {
@@ -25,59 +26,51 @@ export default function AboutModal() {
     return contributors.data;
   });
   return (
-    <div class="modal-box flex flex-col">
-      <span class="text-base-content font-bold text-lg">关于</span>
-      <span class="text-sm text-base-content/60">桃李不言，下自成蹊。</span>
-      <div class="flex flex-col mt-3 gap-2">
-        <div class="flex flex-col items-start">
-          <span
-            class="link link-hover font-bold text-accent"
-            onClick={() =>
-              open_url(
-                "https://github.com/zhangxichang/pupu/graphs/contributors",
-              )
-            }
-          >
-            贡献者们
-          </span>
-          <div class="avatar-group w-full justify-center -space-x-6">
-            <ErrorBoundary
-              fallback={(error) => <Error error={error as Error} />}
-            >
-              <Suspense fallback={<Loading />}>
-                <For each={contributors()}>
-                  {(v) => (
-                    <div class="avatar">
-                      <Show
-                        keyed
-                        when={v.avatar_url}
-                        fallback={
-                          <UserIcon class="size-10 rounded-full bg-base-300" />
-                        }
-                      >
-                        {(v) => <Image class="size-10" image={v} />}
-                      </Show>
-                    </div>
-                  )}
-                </For>
-              </Suspense>
-            </ErrorBoundary>
-          </div>
-        </div>
-        <div class="flex flex-col items-start">
-          <span
-            class="link link-hover text-sm font-bold text-info"
-            onClick={() => open_url("https://github.com/zhangxichang/pupu")}
-          >
-            源码仓库
-          </span>
-          <Show when={import.meta.env.TAURI_ENV_PLATFORM !== undefined}>
-            <span class="text-sm text-base-content/60">
-              版本号: {version() ?? "开发版本"}
-            </span>
-          </Show>
+    <Modal title="关于" description="桃李不言，下自成蹊。">
+      <div class="flex flex-col items-start">
+        <span
+          class="link link-hover font-bold text-accent"
+          onClick={() =>
+            open_url("https://github.com/zhangxichang/pupu/graphs/contributors")
+          }
+        >
+          贡献者们
+        </span>
+        <div class="avatar-group w-full justify-center -space-x-6">
+          <ErrorBoundary fallback={(error) => <Error error={error as Error} />}>
+            <Suspense fallback={<Loading />}>
+              <For each={contributors()}>
+                {(v) => (
+                  <div class="avatar">
+                    <Show
+                      keyed
+                      when={v.avatar_url}
+                      fallback={
+                        <UserIcon class="size-10 rounded-full bg-base-300" />
+                      }
+                    >
+                      {(v) => <Image class="size-10" image={v} />}
+                    </Show>
+                  </div>
+                )}
+              </For>
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </div>
-    </div>
+      <div class="flex flex-col items-start">
+        <span
+          class="link link-hover text-sm font-bold text-info"
+          onClick={() => open_url("https://github.com/zhangxichang/pupu")}
+        >
+          源码仓库
+        </span>
+        <Show when={import.meta.env.TAURI_ENV_PLATFORM !== undefined}>
+          <span class="text-sm text-base-content/60">
+            版本号: {version() ?? "开发版本"}
+          </span>
+        </Show>
+      </div>
+    </Modal>
   );
 }

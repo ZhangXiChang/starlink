@@ -4,6 +4,7 @@ import type { Person } from "~/lib/endpoint/types";
 import { SendIcon, UserIcon } from "lucide-solid";
 import Image from "../widgets/image";
 import { tryit } from "radash";
+import Modal from "../modal";
 
 export default function AddFriend() {
   const home_store = use_context(HomeContext);
@@ -29,78 +30,72 @@ export default function AddFriend() {
     }
   };
   return (
-    <div class="modal-box flex flex-col">
-      <span class="text-base-content font-bold text-lg">添加好友</span>
-      <span class="text-sm text-base-content/60">两地俱秋夕，相望共星河。</span>
-      <div class="flex flex-col mt-3 gap-2">
-        <div class="flex flex-col items-start gap-1">
-          <span class="font-bold">搜索用户</span>
-          <div class="join w-full">
-            <input
-              ref={search_user_id_input_ref}
-              class="join-item input flex-1"
-              placeholder="用户ID"
-              onKeyDown={async (e) => {
-                if (e.key === "Enter") {
-                  await on_search_user();
-                }
-              }}
-            />
-            <button class="join-item btn" onClick={on_search_user}>
-              搜索
-            </button>
-          </div>
+    <Modal title="添加好友" description="两地俱秋夕，相望共星河。">
+      <div class="flex flex-col items-start gap-1">
+        <span class="font-bold">搜索用户</span>
+        <div class="join w-full">
+          <input
+            ref={search_user_id_input_ref}
+            class="join-item input flex-1"
+            placeholder="用户ID"
+            onKeyDown={async (e) => {
+              if (e.key === "Enter") {
+                await on_search_user();
+              }
+            }}
+          />
+          <button class="join-item btn" onClick={on_search_user}>
+            搜索
+          </button>
         </div>
-        <Show when={search_user_result()}>
-          {(v) => (
-            <div class="flex p-2 gap-3 items-center">
-              <div class="avatar">
-                <Show
-                  keyed
-                  when={v().avatar}
-                  fallback={
-                    <UserIcon class="size-12 rounded-full bg-base-300" />
-                  }
-                >
-                  {(v) => <Image class="size-12 rounded-full" image={v} />}
-                </Show>
-              </div>
-              <div class="flex flex-col">
-                <span class="font-bold">{v().name}</span>
-                <span class="text-sm text-base-content/60">{v().bio}</span>
-              </div>
-              <div class="flex-1 flex justify-end">
-                <div class="tooltip tooltip-left" data-tip="发送好友请求">
-                  <button
-                    disabled={send_friend_request_button_disabled()}
-                    class="btn btn-square btn-sm"
-                    onClick={() => {
-                      set_send_friend_request_button_disabled(true);
-                      void (async () => {
-                        const [err, agree] = await tryit(() =>
-                          home_store.endpoint.request_friend(v().id),
-                        )();
-                        if (err) {
-                          console.error(err);
+      </div>
+      <Show when={search_user_result()}>
+        {(v) => (
+          <div class="flex p-2 gap-3 items-center">
+            <div class="avatar">
+              <Show
+                keyed
+                when={v().avatar}
+                fallback={<UserIcon class="size-12 rounded-full bg-base-300" />}
+              >
+                {(v) => <Image class="size-12 rounded-full" image={v} />}
+              </Show>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-bold">{v().name}</span>
+              <span class="text-sm text-base-content/60">{v().bio}</span>
+            </div>
+            <div class="flex-1 flex justify-end">
+              <div class="tooltip tooltip-left" data-tip="发送好友请求">
+                <button
+                  disabled={send_friend_request_button_disabled()}
+                  class="btn btn-square btn-sm"
+                  onClick={() => {
+                    set_send_friend_request_button_disabled(true);
+                    void (async () => {
+                      const [err, agree] = await tryit(() =>
+                        home_store.endpoint.request_friend(v().id),
+                      )();
+                      if (err) {
+                        console.error(err);
+                      } else {
+                        if (agree) {
+                          console.info("对方同意好友请求");
                         } else {
-                          if (agree) {
-                            console.info("对方同意好友请求");
-                          } else {
-                            console.error("对方拒绝好友请求");
-                          }
+                          console.error("对方拒绝好友请求");
                         }
-                        set_send_friend_request_button_disabled(false);
-                      })();
-                    }}
-                  >
-                    <SendIcon class="size-4" />
-                  </button>
-                </div>
+                      }
+                      set_send_friend_request_button_disabled(false);
+                    })();
+                  }}
+                >
+                  <SendIcon class="size-4" />
+                </button>
               </div>
             </div>
-          )}
-        </Show>
-      </div>
-    </div>
+          </div>
+        )}
+      </Show>
+    </Modal>
   );
 }
