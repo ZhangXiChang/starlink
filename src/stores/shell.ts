@@ -1,14 +1,14 @@
 import { createSignal, type Signal } from "solid-js";
-import type { Person } from "~/lib/endpoint/types";
+import type { User } from "~/lib/endpoint/types";
 import { Toaster } from "~/lib/toaster";
 
 export class ShellStore {
   toaster: Toaster;
-  user_person: Signal<Person | undefined>;
+  user: Signal<User | undefined>;
 
   private constructor() {
     this.toaster = new Toaster();
-    this.user_person = createSignal();
+    this.user = createSignal();
   }
   static new() {
     return new ShellStore();

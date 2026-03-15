@@ -2,7 +2,7 @@ import { MessagesSquareIcon, UserIcon, UserPlusIcon } from "lucide-solid";
 import { createSignal, For, lazy, Show, Suspense, type Setter } from "solid-js";
 import { createAsync, useParams } from "@solidjs/router";
 import { QueryBuilder } from "~/lib/query_builder";
-import type { Person } from "~/lib/endpoint/types";
+import type { User } from "~/lib/endpoint/types";
 import { MainContext, use_context } from "../context";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import Image from "../widgets/image";
@@ -10,21 +10,22 @@ import Image from "../widgets/image";
 const LazyAddFriendModal = lazy(() => import("~/components/modal/add_friend"));
 
 export default function FriendList(props: {
-  set_chat_person: Setter<Person | undefined>;
+  set_chat_user: Setter<User | undefined>;
 }) {
   let add_friend_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_add_friend_modal_load, set_lazy_add_friend_modal_load] =
     createSignal(false);
   const main_store = use_context(MainContext);
   const params = useParams<{ user_id: string }>();
-  const friends = createAsync(async () => {
-    return main_store.sqlite.query<Person>(
-      QueryBuilder.selectFrom("friend")
-        .select(["id", "name", "avatar", "bio"])
-        .where("user_id", "=", params.user_id)
-        .compile(),
-    );
-  });
+  const friends = createAsync(
+    async () =>
+      await main_store.sqlite.query<User>(
+        QueryBuilder.selectFrom("friend")
+          .select(["id", "name", "avatar", "bio"])
+          .where("user_id", "=", params.user_id)
+          .compile(),
+      ),
+  );
   let friend_list_ref: HTMLDivElement | undefined;
   const friend_list_virtualizer = createVirtualizer({
     getScrollElement: () => friend_list_ref ?? null,
@@ -69,7 +70,7 @@ export default function FriendList(props: {
             style={{ height: `${friend_list_virtualizer.getTotalSize()}px` }}
           >
             <ul
-              class="list absolute inset-0"
+              class="list absolute w-full"
               style={{
                 transform: `translateY(${friend_list_virtualizer.getVirtualItems().at(0)?.start ?? 0}px)`,
               }}
@@ -105,7 +106,7 @@ export default function FriendList(props: {
                     <button
                       class="btn btn-square btn-ghost"
                       onClick={() =>
-                        props.set_chat_person(friends()?.at(v.index))
+                        props.set_chat_user(friends()?.at(v.index))
                       }
                     >
                       <MessagesSquareIcon />
