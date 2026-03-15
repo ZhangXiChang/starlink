@@ -1,5 +1,5 @@
 import { MessagesSquareIcon, UserIcon, UserPlusIcon } from "lucide-solid";
-import { createSignal, For, lazy, Show, Suspense } from "solid-js";
+import { createSignal, For, lazy, Show, Suspense, type Setter } from "solid-js";
 import { createAsync, useParams } from "@solidjs/router";
 import { QueryBuilder } from "~/lib/query_builder";
 import type { Person } from "~/lib/endpoint/types";
@@ -9,7 +9,9 @@ import Image from "../widgets/image";
 
 const LazyAddFriendModal = lazy(() => import("~/components/modal/add_friend"));
 
-export default function FriendList() {
+export default function FriendList(props: {
+  set_chat_person: Setter<Person | undefined>;
+}) {
   let add_friend_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_add_friend_modal_load, set_lazy_add_friend_modal_load] =
     createSignal(false);
@@ -67,7 +69,7 @@ export default function FriendList() {
             style={{ height: `${friend_list_virtualizer.getTotalSize()}px` }}
           >
             <ul
-              class="list absolute w-full"
+              class="list absolute inset-0"
               style={{
                 transform: `translateY(${friend_list_virtualizer.getVirtualItems().at(0)?.start ?? 0}px)`,
               }}
@@ -100,7 +102,12 @@ export default function FriendList() {
                         {friends()?.at(v.index)?.bio}
                       </span>
                     </div>
-                    <button class="btn btn-square btn-ghost">
+                    <button
+                      class="btn btn-square btn-ghost"
+                      onClick={() =>
+                        props.set_chat_person(friends()?.at(v.index))
+                      }
+                    >
                       <MessagesSquareIcon />
                     </button>
                   </li>

@@ -2,7 +2,7 @@ import type { JSX } from "solid-js";
 
 export default function Modal(props: {
   title: string;
-  description: string;
+  description?: string;
   children: JSX.Element;
 }) {
   return (

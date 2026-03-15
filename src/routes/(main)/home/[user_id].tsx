@@ -6,13 +6,13 @@ import {
   ShellContext,
   use_context,
 } from "~/components/context";
+import ChatBar from "~/components/ui/chat_bar";
 import FriendList from "~/components/ui/friend_list";
 import SidebarButtonGroup, {
   type SidebarButtonGroupState,
 } from "~/components/ui/sidebar_button_group";
+import type { Person } from "~/lib/endpoint/types";
 import { HomeStore } from "~/stores/home";
-
-//打算在按钮组上面，顶栏下面，添加用户Avator，用户点击Avator可以显示自己的信息
 
 export default function Home() {
   const params = useParams<{ user_id: string }>();
@@ -23,6 +23,10 @@ export default function Home() {
   );
   const [sidebar_button_group_state, set_sidebar_button_group_state] =
     createSignal<SidebarButtonGroupState>(null);
+  const [chat_person, set_chat_person] = createSignal<Person | undefined>({
+    name: "测试",
+    bio: "测试描述",
+  });
   return (
     <Show keyed when={store()}>
       {(v) => {
@@ -30,12 +34,12 @@ export default function Home() {
         return (
           <HomeContext.Provider value={v}>
             <SidebarButtonGroup set_state={set_sidebar_button_group_state} />
-            <div class="flex-1 flex">
-              <div class="flex-1 flex justify-center items-center">
-                聊天界面待实现
-              </div>
+            <div class="flex-1 flex relative">
+              <Show keyed when={chat_person()}>
+                {(v) => <ChatBar person={v} />}
+              </Show>
               <Show when={sidebar_button_group_state()}>
-                <div class="absolute w-80 h-full flex flex-col bg-base-100 border border-base-300 rounded-t-box">
+                <div class="absolute inset-0 right-4 max-w-80 flex flex-col bg-base-100 border border-base-300 rounded-t-box">
                   <Switch>
                     <Match when={sidebar_button_group_state() === "message"}>
                       <div class="flex-1 flex items-center justify-center">
@@ -45,7 +49,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={sidebar_button_group_state() === "friend"}>
-                      <FriendList />
+                      <FriendList set_chat_person={set_chat_person} />
                     </Match>
                     <Match when={sidebar_button_group_state() === "group"}>
                       <div class="flex-1 flex items-center justify-center">
