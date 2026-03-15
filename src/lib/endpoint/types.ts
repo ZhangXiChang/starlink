@@ -6,7 +6,15 @@ export type Person = {
   bio: string;
 };
 
+export type User = { id: string } & Person;
+
 export type RelayConfig = {
   url: string;
   quic_port: number;
+};
+
+export type Message = {
+  sender_id: string;
+  timestamp: number;
+  content: string;
 };

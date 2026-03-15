@@ -29,5 +29,5 @@ model message {
   id        Int      @id @default(autoincrement())
   sender_id String
   timestamp DateTime @default(now())
-  text      String
+  content      String
 }

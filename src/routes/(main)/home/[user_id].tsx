@@ -11,7 +11,7 @@ import FriendList from "~/components/ui/friend_list";
 import SidebarButtonGroup, {
   type SidebarButtonGroupState,
 } from "~/components/ui/sidebar_button_group";
-import type { Person } from "~/lib/endpoint/types";
+import type { User } from "~/lib/endpoint/types";
 import { HomeStore } from "~/stores/home";
 
 export default function Home() {
@@ -23,10 +23,7 @@ export default function Home() {
   );
   const [sidebar_button_group_state, set_sidebar_button_group_state] =
     createSignal<SidebarButtonGroupState>(null);
-  const [chat_person, set_chat_person] = createSignal<Person | undefined>({
-    name: "测试",
-    bio: "测试描述",
-  });
+  const [chat_user, set_chat_user] = createSignal<User>();
   return (
     <Show keyed when={store()}>
       {(v) => {
@@ -35,8 +32,8 @@ export default function Home() {
           <HomeContext.Provider value={v}>
             <SidebarButtonGroup set_state={set_sidebar_button_group_state} />
             <div class="flex-1 flex relative">
-              <Show keyed when={chat_person()}>
-                {(v) => <ChatBar person={v} />}
+              <Show keyed when={chat_user()}>
+                {(v) => <ChatBar chat_user={v} />}
               </Show>
               <Show when={sidebar_button_group_state()}>
                 <div class="absolute inset-0 right-4 max-w-80 flex flex-col bg-base-100 border border-base-300 rounded-t-box">
@@ -49,7 +46,7 @@ export default function Home() {
                       </div>
                     </Match>
                     <Match when={sidebar_button_group_state() === "friend"}>
-                      <FriendList set_chat_person={set_chat_person} />
+                      <FriendList set_chat_user={set_chat_user} />
                     </Match>
                     <Match when={sidebar_button_group_state() === "group"}>
                       <div class="flex-1 flex items-center justify-center">

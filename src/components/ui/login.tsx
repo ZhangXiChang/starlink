@@ -22,17 +22,18 @@ const FormSchema = type({
 export default function Login() {
   const navigate = useNavigate();
   const main_store = use_context(MainContext);
-  const [users, users_actions] = createResource(async () => {
-    return await main_store.sqlite.query<{
-      id: string;
-      name: string;
-      avatar?: Uint8Array;
-    }>(
-      QueryBuilder.selectFrom("user")
-        .select(["id", "name", "avatar"])
-        .compile(),
-    );
-  });
+  const [users, users_actions] = createResource(
+    async () =>
+      await main_store.sqlite.query<{
+        id: string;
+        name: string;
+        avatar?: Uint8Array;
+      }>(
+        QueryBuilder.selectFrom("user")
+          .select(["id", "name", "avatar"])
+          .compile(),
+      ),
+  );
   onMount(() =>
     onCleanup(
       main_store.sqlite.on_update(async () => {

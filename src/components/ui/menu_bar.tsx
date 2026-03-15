@@ -12,7 +12,7 @@ const LazyUserInfoModal = lazy(() => import("~/components/modal/user_info"));
 
 export default function MenuBar() {
   const shell_store = use_context(ShellContext);
-  const [user_person] = shell_store.user_person;
+  const [user] = shell_store.user;
   let about_dialog_ref: HTMLDialogElement | undefined;
   const [lazy_about_modal_load, set_lazy_about_modal_load] =
     createSignal(false);
@@ -54,7 +54,7 @@ export default function MenuBar() {
           import.meta.env.TAURI_ENV_PLATFORM === "android" && "mt-8",
         )}
       >
-        <Show keyed when={user_person()}>
+        <Show keyed when={user()}>
           {(v) => (
             <div
               class="avatar cursor-pointer p-2 pr-0"

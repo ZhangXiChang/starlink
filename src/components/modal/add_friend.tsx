@@ -1,17 +1,18 @@
 import { createSignal, Show } from "solid-js";
-import { HomeContext, use_context } from "../context";
-import type { Person } from "~/lib/endpoint/types";
+import { HomeContext, ShellContext, use_context } from "../context";
+import type { User } from "~/lib/endpoint/types";
 import { SendIcon, UserIcon } from "lucide-solid";
 import Image from "../widgets/image";
 import { tryit } from "radash";
 import Modal from "../modal";
 
+// TODO 对方同意好友就把对方添加到数据库中
+
 export default function AddFriend() {
+  const shell_store = use_context(ShellContext);
   const home_store = use_context(HomeContext);
   let search_user_id_input_ref: HTMLInputElement | undefined;
-  const [search_user_result, set_search_user_result] = createSignal<
-    Person & { id: string }
-  >();
+  const [search_user_result, set_search_user_result] = createSignal<User>();
   const [
     send_friend_request_button_disabled,
     set_send_friend_request_button_disabled,
@@ -77,12 +78,19 @@ export default function AddFriend() {
                         home_store.endpoint.request_friend(v().id),
                       )();
                       if (err) {
-                        console.error(err);
+                        shell_store.toaster.popup("error", err.message);
                       } else {
                         if (agree) {
-                          console.info("对方同意好友请求");
+                          shell_store.toaster.popup(
+                            "success",
+                            "对方同意好友请求",
+                          );
+                          console.info(v());
                         } else {
-                          console.error("对方拒绝好友请求");
+                          shell_store.toaster.popup(
+                            "error",
+                            "对方拒绝好友请求",
+                          );
                         }
                       }
                       set_send_friend_request_button_disabled(false);
