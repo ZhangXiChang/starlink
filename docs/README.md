@@ -53,4 +53,4 @@
 
 欢迎提交 Issue、PR 或文档改进，共同完善项目！
 
-[![贡献指南](https://img.shields.io/badge/贡献-指南-0052CC?logo=github)](docs/CONTRIBUTING.md)
+[![贡献指南](https://img.shields.io/badge/贡献-指南-0052CC?logo=github)](CONTRIBUTING.md)
