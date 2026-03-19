@@ -1,0 +1,11 @@
+{
+  "alwaysUpdateLinks": true,
+  "defaultViewMode": "preview",
+  "openBehavior": "file:README",
+  "strictLineBreaks": true,
+  "showLineNumber": true,
+  "tabSize": 4,
+  "newLinkFormat": "relative",
+  "showUnsupportedFiles": true,
+  "showInlineTitle": false
+}
