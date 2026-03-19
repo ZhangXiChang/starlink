@@ -9,15 +9,16 @@
     }
   ],
   "themesList": [],
-  "updateAtStartup": true,
-  "updateThemesAtStartup": true,
+  "updateAtStartup": false,
+  "updateThemesAtStartup": false,
   "enableAfterInstall": true,
   "loggingEnabled": false,
-  "loggingPath": "BRAT-log",
+  "loggingPath": "",
   "loggingVerboseEnabled": false,
   "debuggingMode": false,
   "notificationsEnabled": true,
+  "globalTokenName": "",
   "personalAccessToken": "",
-  "selectLatestPluginVersionByDefault": false,
+  "selectLatestPluginVersionByDefault": true,
   "allowIncompatiblePlugins": false
 }

@@ -1,6 +1,6 @@
 {
   "pythonExecutable": "path",
-  "pythonExecutablePath": ".venv/Scripts/python.exe",
+  "pythonExecutablePath": "../.venv/Scripts/python.exe",
   "startJupyterAuto": true,
   "jupyterEnvType": "lab",
   "useSimpleMode": true,
