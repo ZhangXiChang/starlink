@@ -6,8 +6,6 @@ import Image from "../widgets/image";
 import { tryit } from "radash";
 import Modal from "../modal";
 
-// TODO 对方同意好友就把对方添加到数据库中
-
 export default function AddFriend() {
   const shell_store = use_context(ShellContext);
   const home_store = use_context(HomeContext);
@@ -80,6 +78,7 @@ export default function AddFriend() {
                       if (err) {
                         shell_store.toaster.popup("error", err.message);
                       } else {
+                        // TODO 处理好友添加
                         if (agree) {
                           shell_store.toaster.popup(
                             "success",

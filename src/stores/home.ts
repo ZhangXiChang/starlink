@@ -33,12 +33,15 @@ export class HomeStore {
       avatar: user.avatar,
       bio: user.bio,
     };
+    const endpoint = await main_store.endpoint_module.create_endpoint(
+      user.key,
+      person,
+      [],
+    );
+    // TODO 处理好友请求
     const [, set_user] = shell_store.user;
     set_user({ id: user_id, ...person });
-    return new HomeStore(
-      await main_store.endpoint_module.create_endpoint(user.key, person, []),
-      set_user,
-    );
+    return new HomeStore(endpoint, set_user);
   }
   async cleanup() {
     await this.endpoint.close();
