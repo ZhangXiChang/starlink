@@ -18,6 +18,7 @@
     "check:eslint": "eslint src",
     "native:dev": "tauri dev",
     "native:build": "tauri build",
+    "native:build:debug": "tauri build --debug",
     "android:init": "rimraf native/gen/android && tauri android init && uv run scripts/insert_android_sign_config.py keystore.properties",
     "android:dev": "tauri android dev",
     "android:build": "tauri android build --apk --split-per-abi --target aarch64"

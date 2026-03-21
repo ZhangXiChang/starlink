@@ -67,12 +67,12 @@ export default function MenuBar() {
                 keyed
                 when={v.avatar}
                 fallback={
-                  <UserIcon class="size-10 rounded-full bg-base-300 hover:outline outline-neutral-300" />
+                  <UserIcon class="size-10 rounded-full bg-base-300 hover:ring ring-neutral-300" />
                 }
               >
                 {(avatar) => (
                   <Image
-                    class="size-10 rounded-full hover:outline outline-neutral-300"
+                    class="size-10 rounded-full hover:ring ring-neutral-300"
                     image={avatar}
                   />
                 )}

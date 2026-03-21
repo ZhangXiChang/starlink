@@ -1,15 +1,27 @@
-import type { JSX } from "solid-js";
+import { Show, type JSX } from "solid-js";
 
 export default function Modal(props: {
-  title: string;
+  title?: string;
   description?: string;
   children: JSX.Element;
 }) {
   return (
-    <div class="modal-box flex flex-col">
-      <span class="text-base-content font-bold text-lg">{props.title}</span>
-      <span class="text-sm text-base-content/60">{props.description}</span>
-      <div class="flex flex-col mt-3 gap-2">{props.children}</div>
+    <div class="modal-box flex flex-col gap-3">
+      <Show when={props.title !== undefined || props.description !== undefined}>
+        <div class="flex flex-col">
+          <Show when={props.title}>
+            <span class="text-base-content font-bold text-lg">
+              {props.title}
+            </span>
+          </Show>
+          <Show when={props.description}>
+            <span class="text-sm text-base-content/60">
+              {props.description}
+            </span>
+          </Show>
+        </div>
+      </Show>
+      <div class="flex flex-col">{props.children}</div>
     </div>
   );
 }

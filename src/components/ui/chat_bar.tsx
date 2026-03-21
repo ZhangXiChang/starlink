@@ -35,12 +35,12 @@ export default function ChatBar(props: { chat_user: User }) {
             keyed
             when={props.chat_user.avatar}
             fallback={
-              <UserIcon class="size-10 rounded-full bg-base-300 hover:outline outline-neutral-300" />
+              <UserIcon class="size-10 rounded-full bg-base-300 hover:ring ring-neutral-300" />
             }
           >
             {(avatar) => (
               <Image
-                class="size-10 rounded-full hover:outline outline-neutral-300"
+                class="size-10 rounded-full hover:ring ring-neutral-300"
                 image={avatar}
               />
             )}

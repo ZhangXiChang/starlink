@@ -4,7 +4,7 @@ import Modal from "../modal";
 export default function Setting() {
   const shell_store = use_context(ShellContext);
   return (
-    <Modal title="设置" description="适应你的习惯">
+    <Modal title="设置">
       <button
         class="btn"
         onClick={() => {
