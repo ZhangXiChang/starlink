@@ -30,9 +30,9 @@ export class SQLiteModuleImpl implements SQLiteModule {
 }
 
 export class SQLiteImpl implements SQLite {
-  private api: Remote<SQLiteWorker>;
-  private id: number;
-  private on_updates: ((event: SQLiteUpdateEvent) => void)[];
+  private api;
+  private id;
+  private on_updates;
 
   private constructor(
     api: Remote<SQLiteWorker>,

@@ -25,7 +25,7 @@ export class EndpointModuleImpl implements EndpointModule {
 }
 
 export class EndpointImpl implements Endpoint {
-  private handle: bigint;
+  private handle;
 
   private constructor(handle: bigint) {
     this.handle = handle;

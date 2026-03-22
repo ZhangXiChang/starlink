@@ -12,15 +12,17 @@ export default function ChatBar(props: { chat_user: User }) {
   const shell_store = use_context(ShellContext);
   const main_store = use_context(MainContext);
   const [user] = shell_store.user;
-  const messages = createAsync(
-    async () =>
-      await main_store.sqlite.query<Message>(
-        QueryBuilder.selectFrom("message")
-          .select(["sender_id", "timestamp", "content"])
-          .where("sender_id", "=", props.chat_user.id)
-          .compile(),
-      ),
-  );
+  const messages = createAsync(async () => {
+    const u = user();
+    if (!u) throw new Error("用户不存在");
+    return await main_store.sqlite.query<Message>(
+      QueryBuilder.selectFrom("chat_message")
+        .select(["chat_user_id", "timestamp", "content"])
+        .where("owner_id", "=", u.id)
+        .where("chat_user_id", "=", props.chat_user.id)
+        .compile(),
+    );
+  });
   let message_list_ref: HTMLDivElement | undefined;
   const message_list_virtualizer = createVirtualizer({
     getScrollElement: () => message_list_ref ?? null,

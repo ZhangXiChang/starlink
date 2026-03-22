@@ -76,20 +76,14 @@ export default function AddFriend() {
                         home_store.endpoint.request_friend(v().id),
                       )();
                       if (err) {
-                        shell_store.toaster.popup("error", err.message);
+                        shell_store.toaster.popup(err.message);
                       } else {
                         // TODO 处理好友添加
                         if (agree) {
-                          shell_store.toaster.popup(
-                            "success",
-                            "对方同意好友请求",
-                          );
+                          shell_store.toaster.popup("对方同意好友请求");
                           console.info(v());
                         } else {
-                          shell_store.toaster.popup(
-                            "error",
-                            "对方拒绝好友请求",
-                          );
+                          shell_store.toaster.popup("对方拒绝好友请求");
                         }
                       }
                       set_send_friend_request_button_disabled(false);

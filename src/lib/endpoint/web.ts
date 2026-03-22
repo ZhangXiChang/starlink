@@ -28,7 +28,7 @@ export class EndpointModuleImpl implements EndpointModule {
 }
 
 export class EndpointImpl implements Endpoint {
-  private endpoint: WasmEndpoint;
+  private endpoint;
 
   private constructor(endpoint: WasmEndpoint) {
     this.endpoint = endpoint;

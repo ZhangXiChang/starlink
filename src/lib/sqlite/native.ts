@@ -12,8 +12,8 @@ export class SQLiteModuleImpl implements SQLiteModule {
 }
 
 export class SQLiteImpl implements SQLite {
-  private handle: bigint;
-  private on_updates: ((event: SQLiteUpdateEvent) => void)[];
+  private handle;
+  private on_updates;
 
   private constructor(
     handle: bigint,

@@ -4,9 +4,9 @@ import { SQLiteModuleAdapter } from "~/lib/sqlite";
 import type { SQLite, SQLiteModule } from "~/lib/sqlite/interface";
 
 export class MainStore {
-  sqlite_module: SQLiteModule;
-  endpoint_module: EndpointModule;
-  sqlite: SQLite;
+  sqlite_module;
+  endpoint_module;
+  sqlite;
 
   private constructor(
     sqlite_module: SQLiteModule,
