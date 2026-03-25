@@ -1,14 +1,15 @@
 from argparse import ArgumentParser
 from os import path
 from shutil import copyfile
+
 from kopyt import Parser
 from kopyt.node import (
+    CallSuffix,
     ImportHeader,
+    LineStringLiteral,
     PostfixUnaryExpression,
     SimpleIdentifier,
-    CallSuffix,
     ValueArgument,
-    LineStringLiteral,
 )
 from kopyt.position import Position
 
@@ -55,7 +56,7 @@ for root_statement in gradle_build_script.statements:
             if root_statement.statement.expression.value == "android":
                 for android_suffixe in root_statement.statement.suffixes:
                     if isinstance(android_suffixe, CallSuffix):
-                        if android_suffixe.lambda_expression != None:
+                        if android_suffixe.lambda_expression is not None:
                             android_suffixe.lambda_expression.value.statements = [
                                 Parser(signing_configs_code).parse_statement()
                             ] + list(android_suffixe.lambda_expression.value.statements)
@@ -81,13 +82,9 @@ for root_statement in gradle_build_script.statements:
                                                 ):
                                                     if (
                                                         buildtypes_suffixe.lambda_expression
-                                                        != None
+                                                        is not None
                                                     ):
-                                                        for (
-                                                            buildtypes_statement
-                                                        ) in (
-                                                            buildtypes_suffixe.lambda_expression.value.statements
-                                                        ):
+                                                        for buildtypes_statement in buildtypes_suffixe.lambda_expression.value.statements:
                                                             if isinstance(
                                                                 buildtypes_statement.statement,
                                                                 PostfixUnaryExpression,
@@ -100,20 +97,16 @@ for root_statement in gradle_build_script.statements:
                                                                         buildtypes_statement.statement.expression.value
                                                                         == "getByName"
                                                                     ):
-                                                                        for getbyname_suffixe in (
-                                                                            buildtypes_statement.statement.suffixes
-                                                                        ):
+                                                                        for getbyname_suffixe in buildtypes_statement.statement.suffixes:
                                                                             if isinstance(
                                                                                 getbyname_suffixe,
                                                                                 CallSuffix,
                                                                             ):
                                                                                 if (
                                                                                     getbyname_suffixe.arguments
-                                                                                    != None
+                                                                                    is not None
                                                                                 ):
-                                                                                    for getbyname_suffixe_argument in (
-                                                                                        getbyname_suffixe.arguments
-                                                                                    ):
+                                                                                    for getbyname_suffixe_argument in getbyname_suffixe.arguments:
                                                                                         if isinstance(
                                                                                             getbyname_suffixe_argument,
                                                                                             ValueArgument,
@@ -128,15 +121,18 @@ for root_statement in gradle_build_script.statements:
                                                                                                 ):
                                                                                                     if (
                                                                                                         getbyname_suffixe.lambda_expression
-                                                                                                        != None
+                                                                                                        is not None
                                                                                                     ):
-                                                                                                        getbyname_suffixe.lambda_expression.value.statements = list(
-                                                                                                            getbyname_suffixe.lambda_expression.value.statements
-                                                                                                        ) + [
-                                                                                                            Parser(
-                                                                                                                use_signing_configs_code
-                                                                                                            ).parse_statement()
-                                                                                                        ]
+                                                                                                        getbyname_suffixe.lambda_expression.value.statements = (
+                                                                                                            list(
+                                                                                                                getbyname_suffixe.lambda_expression.value.statements
+                                                                                                            )
+                                                                                                            + [
+                                                                                                                Parser(
+                                                                                                                    use_signing_configs_code
+                                                                                                                ).parse_statement()
+                                                                                                            ]
+                                                                                                        )
 gradle_build_script_file.seek(0)
 gradle_build_script_file.truncate()
 gradle_build_script_file.write(gradle_build_script.__str__())
