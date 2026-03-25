@@ -6,8 +6,8 @@ import type { ShellStore } from "./shell";
 import type { Setter } from "solid-js";
 
 export class HomeStore {
-  endpoint: Endpoint;
-  set_user: Setter<User | undefined>;
+  endpoint;
+  set_user;
 
   private constructor(endpoint: Endpoint, set_user: Setter<User | undefined>) {
     this.endpoint = endpoint;
@@ -38,7 +38,34 @@ export class HomeStore {
       person,
       [],
     );
-    // TODO 处理好友请求
+    void (async () => {
+      const event_type = await endpoint.person_protocol_next_event();
+      if (event_type === "FriendRequest") {
+        const remote_id =
+          await endpoint.person_protocol_event<string>("remote_id");
+        const result = await main_store.sqlite.query(
+          QueryBuilder.selectFrom("friend")
+            .select((eb) => eb.val(1).as("exists"))
+            .where("owner_id", "=", user_id)
+            .where("id", "=", remote_id)
+            .limit(1)
+            .compile(),
+        );
+        if (result.length !== 0) {
+          await endpoint.person_protocol_event("reject");
+        } else {
+          // TODO 好友请求通知
+          const person = await endpoint.request_person(remote_id);
+          shell_store.toaster.popup("添加好友");
+          await endpoint.person_protocol_event("accept");
+          await main_store.sqlite.execute(
+            QueryBuilder.insertInto("friend")
+              .values({ id: remote_id, owner_id: user_id, ...person })
+              .compile(),
+          );
+        }
+      }
+    })();
     const [, set_user] = shell_store.user;
     set_user({ id: user_id, ...person });
     return new HomeStore(endpoint, set_user);

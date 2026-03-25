@@ -8,7 +8,10 @@ export default function Setting() {
       <button
         class="btn"
         onClick={() => {
-          shell_store.toaster.popup("success", "你好，世界");
+          const close = shell_store.toaster.popup("你好，世界");
+          setTimeout(() => {
+            close();
+          }, 3000);
         }}
       >
         测试按钮

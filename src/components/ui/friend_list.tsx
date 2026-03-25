@@ -22,7 +22,7 @@ export default function FriendList(props: {
       await main_store.sqlite.query<User>(
         QueryBuilder.selectFrom("friend")
           .select(["id", "name", "avatar", "bio"])
-          .where("user_id", "=", params.user_id)
+          .where("owner_id", "=", params.user_id)
           .compile(),
       ),
   );

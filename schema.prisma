@@ -18,16 +18,16 @@ model user {
 }
 
 model friend {
-  id      String @id
-  user_id String
-  name    String
-  avatar  Bytes?
-  bio     String
+  id       String @id
+  owner_id String
+  name     String
+  avatar   Bytes?
+  bio      String
 }
 
-model message {
-  id        Int      @id @default(autoincrement())
-  sender_id String
-  timestamp DateTime @default(now())
+model chat_message {
+  timestamp    DateTime @id @default(now())
+  owner_id     String
+  chat_user_id String
   content      String
 }

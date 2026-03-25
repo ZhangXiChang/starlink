@@ -20,7 +20,7 @@ if (import.meta.env.TAURI_ENV_PLATFORM !== undefined) {
     log_error(error);
     void createTauRPCProxy().log.error(error.message);
   };
-  window.onunhandledrejection = (e) => {
+  onunhandledrejection = (e) => {
     e.preventDefault();
     console.error(e.reason);
   };

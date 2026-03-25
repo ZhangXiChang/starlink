@@ -1,55 +1,25 @@
-import { createStore, produce } from "solid-js/store";
+import { createSignal } from "solid-js";
 import { uid } from "radash";
 import type { JSX } from "solid-js";
 
-const DEFAULT_DURATION = {
-  info: 3000,
-  success: 2000,
-  warning: 4000,
-  error: 5000,
-};
-
-export type ToastLevel = "info" | "success" | "warning" | "error";
-export type Toast = {
-  id: string;
-  level: ToastLevel;
-  content: JSX.Element;
-};
-
 export class Toaster {
-  items;
-  private set_items;
-  private timeouts = new Map<string, number>();
+  toasts;
+  private set_toasts;
 
   constructor() {
-    [this.items, this.set_items] = createStore<Toast[]>([]);
-  }
-  popup(
-    level: ToastLevel,
-    content: JSX.Element,
-    duration = DEFAULT_DURATION[level],
-  ) {
-    const id = uid(8);
-    this.set_items(produce((draft) => draft.push({ id, level, content })));
-    if (duration > 0) {
-      this.timeouts.set(
-        id,
-        window.setTimeout(() => this.remove(id), duration),
-      );
-    }
-    return () => this.remove(id);
-  }
-  private remove(id: string) {
-    const timeout = this.timeouts.get(id);
-    if (timeout !== undefined) {
-      window.clearTimeout(timeout);
-      this.timeouts.delete(id);
-    }
-    this.set_items(
-      produce((draft) => {
-        const idx = draft.findIndex((t) => t.id === id);
-        if (idx !== -1) draft.splice(idx, 1);
-      }),
+    [this.toasts, this.set_toasts] = createSignal<Map<string, JSX.Element>>(
+      new Map(),
     );
+  }
+  popup(content: JSX.Element) {
+    const id = uid(8);
+    this.set_toasts((v) => new Map(v).set(id, content));
+    return () => {
+      this.set_toasts((v) => {
+        const a = new Map(v);
+        a.delete(id);
+        return a;
+      });
+    };
   }
 }
