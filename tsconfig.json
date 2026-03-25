@@ -1,26 +1,26 @@
 {
-  "include": ["src", "*.ts"],
-  "compilerOptions": {
-    "paths": {
-      "~/*": ["./src/*"]
-    },
-    "target": "esnext",
-    "module": "esnext",
-    "lib": ["ESNext", "DOM", "DOM.AsyncIterable"],
-    "jsx": "preserve",
-    "jsxImportSource": "solid-js",
-    "noEmit": true,
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "skipLibCheck": true,
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
-    "verbatimModuleSyntax": true,
-    "noUncheckedSideEffectImports": true,
-    "noFallthroughCasesInSwitch": true,
-    "useDefineForClassFields": true,
-    "isolatedModules": true
-  }
+	"include": ["src", "*.ts"],
+	"compilerOptions": {
+		"paths": {
+			"~/*": ["./src/*"]
+		},
+		"target": "esnext",
+		"module": "esnext",
+		"lib": ["ESNext", "DOM", "DOM.AsyncIterable"],
+		"jsx": "preserve",
+		"jsxImportSource": "solid-js",
+		"noEmit": true,
+		"moduleResolution": "bundler",
+		"moduleDetection": "force",
+		"skipLibCheck": true,
+		"strict": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"erasableSyntaxOnly": true,
+		"verbatimModuleSyntax": true,
+		"noUncheckedSideEffectImports": true,
+		"noFallthroughCasesInSwitch": true,
+		"useDefineForClassFields": true,
+		"isolatedModules": true
+	}
 }

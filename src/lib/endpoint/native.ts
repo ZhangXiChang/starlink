@@ -4,78 +4,78 @@ import type { Endpoint, EndpointModule } from "./interface";
 import type { PersonProtocolEvent } from "./types";
 
 export class EndpointModuleImpl implements EndpointModule {
-  init() {}
-  async create_endpoint(
-    secret_key: Uint8Array,
-    person: Person,
-    relay_configs: RelayConfig[],
-  ) {
-    return await EndpointImpl.new(secret_key, person, relay_configs);
-  }
-  async generate_secret_key() {
-    return Uint8Array.from(
-      await createTauRPCProxy().endpoint.generate_secret_key(),
-    );
-  }
-  async get_secret_key_id(secret_key: Uint8Array) {
-    return await createTauRPCProxy().endpoint.get_secret_key_id(
-      Array.from(secret_key),
-    );
-  }
+	init() {}
+	async create_endpoint(
+		secret_key: Uint8Array,
+		person: Person,
+		relay_configs: RelayConfig[],
+	) {
+		return await EndpointImpl.new(secret_key, person, relay_configs);
+	}
+	async generate_secret_key() {
+		return Uint8Array.from(
+			await createTauRPCProxy().endpoint.generate_secret_key(),
+		);
+	}
+	async get_secret_key_id(secret_key: Uint8Array) {
+		return await createTauRPCProxy().endpoint.get_secret_key_id(
+			Array.from(secret_key),
+		);
+	}
 }
 
 export class EndpointImpl implements Endpoint {
-  private handle;
+	private handle;
 
-  private constructor(handle: bigint) {
-    this.handle = handle;
-  }
-  static async new(
-    secret_key: Uint8Array,
-    person: Person,
-    relay_configs: RelayConfig[],
-  ) {
-    return new EndpointImpl(
-      await createTauRPCProxy().endpoint.open_endpoint(
-        Array.from(secret_key),
-        person as unknown as JsonValue,
-        relay_configs as unknown as JsonValue[],
-      ),
-    );
-  }
-  async close() {
-    await createTauRPCProxy().endpoint.close_endpoint(this.handle);
-  }
-  async id() {
-    return await createTauRPCProxy().endpoint.id(this.handle);
-  }
-  async person_protocol_next_event() {
-    return (await createTauRPCProxy().endpoint.person_protocol_next_event(
-      this.handle,
-    )) as PersonProtocolEvent;
-  }
-  async person_protocol_event<T>(method: string) {
-    return (await createTauRPCProxy().endpoint.person_protocol_event(
-      this.handle,
-      method,
-    )) as T;
-  }
-  async request_person(id: string) {
-    return (await createTauRPCProxy().endpoint.request_person(
-      this.handle,
-      id,
-    )) as unknown as Person;
-  }
-  async request_friend(id: string) {
-    return await createTauRPCProxy().endpoint.request_friend(this.handle, id);
-  }
-  async request_chat(id: string) {
-    return await createTauRPCProxy().endpoint.request_chat(this.handle, id);
-  }
-  async subscribe_group(ticket: string) {
-    return await createTauRPCProxy().endpoint.subscribe_group(
-      this.handle,
-      ticket,
-    );
-  }
+	private constructor(handle: bigint) {
+		this.handle = handle;
+	}
+	static async new(
+		secret_key: Uint8Array,
+		person: Person,
+		relay_configs: RelayConfig[],
+	) {
+		return new EndpointImpl(
+			await createTauRPCProxy().endpoint.open_endpoint(
+				Array.from(secret_key),
+				person as unknown as JsonValue,
+				relay_configs as unknown as JsonValue[],
+			),
+		);
+	}
+	async close() {
+		await createTauRPCProxy().endpoint.close_endpoint(this.handle);
+	}
+	async id() {
+		return await createTauRPCProxy().endpoint.id(this.handle);
+	}
+	async person_protocol_next_event() {
+		return (await createTauRPCProxy().endpoint.person_protocol_next_event(
+			this.handle,
+		)) as PersonProtocolEvent;
+	}
+	async person_protocol_event<T>(method: string) {
+		return (await createTauRPCProxy().endpoint.person_protocol_event(
+			this.handle,
+			method,
+		)) as T;
+	}
+	async request_person(id: string) {
+		return (await createTauRPCProxy().endpoint.request_person(
+			this.handle,
+			id,
+		)) as unknown as Person;
+	}
+	async request_friend(id: string) {
+		return await createTauRPCProxy().endpoint.request_friend(this.handle, id);
+	}
+	async request_chat(id: string) {
+		return await createTauRPCProxy().endpoint.request_chat(this.handle, id);
+	}
+	async subscribe_group(ticket: string) {
+		return await createTauRPCProxy().endpoint.subscribe_group(
+			this.handle,
+			ticket,
+		);
+	}
 }

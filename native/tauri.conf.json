@@ -1,23 +1,23 @@
 {
-  "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "identifier": "com.zhangxichang.pupu",
-  "productName": "噗噗",
-  "version": "0.1.0",
-  "build": {
-    "frontendDist": "../.output/public",
-    "devUrl": "http://localhost:3000",
-    "beforeDevCommand": "bun vinxi dev --config native.config.ts --host 0.0.0.0",
-    "beforeBuildCommand": "bun run check && bun vinxi build --config native.config.ts"
-  },
-  "app": {
-    "windows": [
-      {
-        "title": "",
-        "width": 1300,
-        "height": 850,
-        "center": true,
-        "decorations": false
-      }
-    ]
-  }
+	"$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
+	"identifier": "com.zhangxichang.pupu",
+	"productName": "噗噗",
+	"version": "0.1.0",
+	"build": {
+		"frontendDist": "../.output/public",
+		"devUrl": "http://localhost:3000",
+		"beforeDevCommand": "bun vinxi dev --config native.config.ts --host 0.0.0.0",
+		"beforeBuildCommand": "bun run check && bun vinxi build --config native.config.ts"
+	},
+	"app": {
+		"windows": [
+			{
+				"title": "",
+				"width": 1300,
+				"height": 850,
+				"center": true,
+				"decorations": false
+			}
+		]
+	}
 }
