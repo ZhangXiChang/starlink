@@ -1,3 +1,6 @@
+import { useNavigate } from "@solidjs/router";
+import { createForm } from "@tanstack/solid-form";
+import { type } from "arktype";
 import { UserIcon } from "lucide-solid";
 import {
 	createResource,
@@ -8,12 +11,9 @@ import {
 	Show,
 	Suspense,
 } from "solid-js";
-import Image from "../widgets/image";
-import { type } from "arktype";
-import { createForm } from "@tanstack/solid-form";
 import { QueryBuilder } from "~/lib/query_builder";
-import { useNavigate } from "@solidjs/router";
 import { MainContext, use_context } from "../context";
+import Image from "../widgets/image";
 
 const FormSchema = type({
 	user_id: type("string").configure({ message: "请选择一个账户" }),

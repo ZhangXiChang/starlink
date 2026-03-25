@@ -1,10 +1,10 @@
-import { useIsRouting, type RouteSectionProps } from "@solidjs/router";
-import { ShellStore } from "./stores/shell";
+import { type RouteSectionProps, useIsRouting } from "@solidjs/router";
 import { ErrorBoundary, For, Show, Suspense } from "solid-js";
 import { ShellContext } from "./components/context";
 import MenuBar from "./components/ui/menu_bar";
-import Loading from "./components/widgets/loading";
 import Error from "./components/widgets/error";
+import Loading from "./components/widgets/loading";
+import { ShellStore } from "./stores/shell";
 
 export function Shell(props: RouteSectionProps) {
 	const store = ShellStore.new();

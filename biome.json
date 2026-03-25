@@ -8,6 +8,9 @@
 	"files": {
 		"includes": ["**", "!**/.obsidian"]
 	},
+	"linter": {
+		"enabled": false
+	},
 	"css": {
 		"parser": {
 			"tailwindDirectives": true

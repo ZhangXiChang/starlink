@@ -1,9 +1,9 @@
-import { proxy, wrap, type Remote } from "comlink";
-import type { SQLite, SQLiteModule } from "./interface";
-import Worker from "./web/worker?worker";
-import type { SQLiteWorker } from "./web/worker";
+import { proxy, type Remote, wrap } from "comlink";
 import type { CompiledQuery } from "kysely";
+import type { SQLite, SQLiteModule } from "./interface";
 import type { SQLiteUpdateEvent } from "./types";
+import type { SQLiteWorker } from "./web/worker";
+import Worker from "./web/worker?worker";
 
 export class SQLiteModuleImpl implements SQLiteModule {
 	private worker?: Worker;

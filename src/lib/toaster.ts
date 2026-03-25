@@ -1,6 +1,6 @@
-import { createSignal } from "solid-js";
 import { uid } from "radash";
 import type { JSX } from "solid-js";
+import { createSignal } from "solid-js";
 
 export class Toaster {
 	toasts;

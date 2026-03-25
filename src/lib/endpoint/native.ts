@@ -1,7 +1,6 @@
 import { createTauRPCProxy, type JsonValue } from "~/generated/ipc_bindings";
-import type { Person, RelayConfig } from "./types";
 import type { Endpoint, EndpointModule } from "./interface";
-import type { PersonProtocolEvent } from "./types";
+import type { Person, PersonProtocolEvent, RelayConfig } from "./types";
 
 export class EndpointModuleImpl implements EndpointModule {
 	init() {}

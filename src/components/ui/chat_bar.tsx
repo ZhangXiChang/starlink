@@ -1,12 +1,12 @@
+import { createAsync } from "@solidjs/router";
+import { createVirtualizer } from "@tanstack/solid-virtual";
 import { UserIcon } from "lucide-solid";
 import { For, Show, Suspense } from "solid-js";
-import Image from "../widgets/image";
-import { MainContext, ShellContext, use_context } from "../context";
-import { createVirtualizer } from "@tanstack/solid-virtual";
 import { twMerge } from "tailwind-merge";
 import type { Message, User } from "~/lib/endpoint/types";
-import { createAsync } from "@solidjs/router";
 import { QueryBuilder } from "~/lib/query_builder";
+import { MainContext, ShellContext, use_context } from "../context";
+import Image from "../widgets/image";
 
 export default function ChatBar(props: { chat_user: User }) {
 	const shell_store = use_context(ShellContext);
