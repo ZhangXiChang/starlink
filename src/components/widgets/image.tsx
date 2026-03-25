@@ -1,4 +1,4 @@
-import { createMemo, onCleanup, splitProps, type JSX } from "solid-js";
+import { createMemo, type JSX, onCleanup, splitProps } from "solid-js";
 
 export default function Image(
 	props: {

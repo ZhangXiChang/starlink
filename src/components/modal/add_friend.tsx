@@ -1,10 +1,10 @@
-import { createSignal, Show } from "solid-js";
-import { HomeContext, ShellContext, use_context } from "../context";
-import type { User } from "~/lib/endpoint/types";
 import { SendIcon, UserIcon } from "lucide-solid";
-import Image from "../widgets/image";
 import { tryit } from "radash";
+import { createSignal, Show } from "solid-js";
+import type { User } from "~/lib/endpoint/types";
+import { HomeContext, ShellContext, use_context } from "../context";
 import Modal from "../modal";
+import Image from "../widgets/image";
 
 export default function AddFriend() {
 	const shell_store = use_context(ShellContext);

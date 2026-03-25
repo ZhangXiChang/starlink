@@ -1,6 +1,6 @@
 import { createAsync } from "@solidjs/router";
 import type { Window } from "@tauri-apps/api/window";
-import { MaximizeIcon, MinimizeIcon, Minimize2Icon, XIcon } from "lucide-solid";
+import { MaximizeIcon, Minimize2Icon, MinimizeIcon, XIcon } from "lucide-solid";
 import { createSignal, onCleanup, onMount, Show } from "solid-js";
 
 export default function WindowControlBar(props: { window: Window }) {

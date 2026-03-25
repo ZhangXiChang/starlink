@@ -1,12 +1,12 @@
+import { createAsync } from "@solidjs/router";
+import { UserIcon } from "lucide-solid";
 import { Octokit } from "octokit";
 import { ErrorBoundary, For, Show, Suspense } from "solid-js";
 import { open_url } from "~/lib/opener";
-import { createAsync } from "@solidjs/router";
+import Modal from "../modal";
+import Error from "../widgets/error";
 import Image from "../widgets/image";
 import Loading from "../widgets/loading";
-import Error from "../widgets/error";
-import { UserIcon } from "lucide-solid";
-import Modal from "../modal";
 
 export default function AboutModal() {
 	const version = createAsync(async () => {

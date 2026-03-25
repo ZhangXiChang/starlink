@@ -1,7 +1,7 @@
 import wasm_init, {
+	Endpoint as WasmEndpoint,
 	generate_secret_key as wasm_generate_secret_key,
 	get_secret_key_id as wasm_get_secret_key_id,
-	Endpoint as WasmEndpoint,
 } from "@pupu/endpoint";
 import wasm_url from "@pupu/endpoint/endpoint_wasm_bg.wasm?url";
 import type { Person, RelayConfig } from "~/lib/endpoint/types";

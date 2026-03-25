@@ -1,12 +1,12 @@
-import wasm_url from "wa-sqlite/dist/wa-sqlite.wasm?url";
-import sqlite_esm_factory from "wa-sqlite/dist/wa-sqlite.mjs";
+import { expose } from "comlink";
+import type { CompiledQuery } from "kysely";
 import * as sqlite from "wa-sqlite";
+import sqlite_esm_factory from "wa-sqlite/dist/wa-sqlite.mjs";
+import wasm_url from "wa-sqlite/dist/wa-sqlite.wasm?url";
 //@ts-expect-error 导入JS模块
 import { OPFSCoopSyncVFS as VFS } from "wa-sqlite/src/examples/OPFSCoopSyncVFS";
-import type { CompiledQuery } from "kysely";
-import type { SQLiteUpdateEvent } from "../types";
-import { expose } from "comlink";
 import type { Init } from "~/lib/interface";
+import type { SQLiteUpdateEvent } from "../types";
 
 export class SQLiteWorker implements Init {
 	private api?: SQLiteAPI;

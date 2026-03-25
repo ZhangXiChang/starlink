@@ -1,10 +1,10 @@
-import { createSignal, lazy, Show } from "solid-js";
-import WindowControlBar from "./window_control_bar";
-import { get_window } from "~/lib/window";
-import { twMerge } from "tailwind-merge";
-import Image from "../widgets/image";
-import { ShellContext, use_context } from "../context";
 import { UserIcon } from "lucide-solid";
+import { createSignal, lazy, Show } from "solid-js";
+import { twMerge } from "tailwind-merge";
+import { get_window } from "~/lib/window";
+import { ShellContext, use_context } from "../context";
+import Image from "../widgets/image";
+import WindowControlBar from "./window_control_bar";
 
 const LazyAboutModal = lazy(() => import("~/components/modal/about"));
 const LazySettingModal = lazy(() => import("~/components/modal/setting"));

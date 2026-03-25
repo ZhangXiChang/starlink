@@ -1,10 +1,10 @@
-import { MessagesSquareIcon, UserIcon, UserPlusIcon } from "lucide-solid";
-import { createSignal, For, lazy, Show, Suspense, type Setter } from "solid-js";
 import { createAsync, useParams } from "@solidjs/router";
-import { QueryBuilder } from "~/lib/query_builder";
-import type { User } from "~/lib/endpoint/types";
-import { MainContext, use_context } from "../context";
 import { createVirtualizer } from "@tanstack/solid-virtual";
+import { MessagesSquareIcon, UserIcon, UserPlusIcon } from "lucide-solid";
+import { createSignal, For, lazy, type Setter, Show, Suspense } from "solid-js";
+import type { User } from "~/lib/endpoint/types";
+import { QueryBuilder } from "~/lib/query_builder";
+import { MainContext, use_context } from "../context";
 import Image from "../widgets/image";
 
 const LazyAddFriendModal = lazy(() => import("~/components/modal/add_friend"));

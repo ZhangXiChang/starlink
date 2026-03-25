@@ -1,10 +1,10 @@
-import { UserIcon } from "lucide-solid";
-import Image from "../widgets/image";
 import { createForm } from "@tanstack/solid-form";
-import { For, Show } from "solid-js";
 import { type } from "arktype";
+import { UserIcon } from "lucide-solid";
+import { For, Show } from "solid-js";
 import { QueryBuilder } from "~/lib/query_builder";
 import { MainContext, use_context } from "../context";
+import Image from "../widgets/image";
 
 const FormSchema = type({
 	user_name: type("string > 0").configure({ message: "用户名不能为空" }),

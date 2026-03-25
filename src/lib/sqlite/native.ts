@@ -1,6 +1,6 @@
+import type { CompiledQuery } from "kysely";
 import { createTauRPCProxy, type JsonValue } from "~/generated/ipc_bindings";
 import type { SQLite, SQLiteModule } from "./interface";
-import type { CompiledQuery } from "kysely";
 import type { SQLiteUpdateEvent } from "./types";
 
 export class SQLiteModuleImpl implements SQLiteModule {

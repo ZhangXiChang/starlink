@@ -1,9 +1,9 @@
-import type { Endpoint } from "~/lib/endpoint/interface";
-import type { MainStore } from "./main";
-import { QueryBuilder } from "~/lib/query_builder";
-import type { Person, User } from "~/lib/endpoint/types";
-import type { ShellStore } from "./shell";
 import type { Setter } from "solid-js";
+import type { Endpoint } from "~/lib/endpoint/interface";
+import type { Person, User } from "~/lib/endpoint/types";
+import { QueryBuilder } from "~/lib/query_builder";
+import type { MainStore } from "./main";
+import type { ShellStore } from "./shell";
 
 export class HomeStore {
 	endpoint;
