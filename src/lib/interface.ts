@@ -1,6 +1,6 @@
 export interface Init {
-  init(): void | Promise<void>;
+	init(): void | Promise<void>;
 }
 export interface Free {
-  free(): void | Promise<void>;
+	free(): void | Promise<void>;
 }

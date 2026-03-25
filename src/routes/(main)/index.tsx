@@ -3,7 +3,7 @@ import { onMount } from "solid-js";
 import Loading from "~/components/widgets/loading";
 
 export default function Index() {
-  const navigate = useNavigate();
-  onMount(() => navigate("auth"));
-  return <Loading />;
+	const navigate = useNavigate();
+	onMount(() => navigate("auth"));
+	return <Loading />;
 }
