@@ -63,7 +63,8 @@ impl Endpoint {
             );
         }
         #[allow(unused_mut)]
-        let mut endpoint_builder = iroh::Endpoint::empty_builder(RelayMode::Custom(relay_map))
+        let mut endpoint_builder = iroh::Endpoint::empty_builder()
+            .relay_mode(RelayMode::Custom(relay_map))
             .address_lookup(PkarrPublisher::n0_dns())
             .address_lookup(PkarrResolver::n0_dns());
         #[cfg(not(target_family = "wasm"))]
