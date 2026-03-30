@@ -15,11 +15,13 @@ db_conn.close()
 os.remove(arg.db_path)
 
 file = open("public/db_schema.sql", "w", encoding="utf-8")
+statements = []
 for row in db_schema:
     row = re.sub(
         r'(CREATE\s+(?:TEMPORARY\s+|VIRTUAL\s+|UNIQUE\s+)?(?:TABLE|INDEX|VIEW|TRIGGER)\s*)(["\'`\[])',
         r"\1IF NOT EXISTS \2",
         row[0],
     )
-    file.write(row + ";\n")
+    statements.append(row + ";")
+file.write("\n".join(statements))
 file.close()
