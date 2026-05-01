@@ -5,7 +5,7 @@ requires-python = ">=3.14"
 dependencies = [
     "black>=26.3.1",
     "isort>=8.0.1",
-    "jupyterlab>=4.5.6",
+    "jupyterlab>=4.5.7",
     "jupyterlab-code-formatter>=3.0.3",
     "jupyterlab-lsp>=5.2.0",
     "kopyt>=0.0.2",
