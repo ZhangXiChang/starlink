@@ -3,7 +3,9 @@ import type { Endpoint, EndpointModule } from "./interface";
 import type { Person, PersonProtocolEvent, RelayConfig } from "./types";
 
 export class EndpointModuleImpl implements EndpointModule {
-	init() {}
+	init() {
+		return;
+	}
 	async create_endpoint(
 		secret_key: Uint8Array,
 		person: Person,
@@ -24,7 +26,7 @@ export class EndpointModuleImpl implements EndpointModule {
 }
 
 export class EndpointImpl implements Endpoint {
-	private handle;
+	private readonly handle;
 
 	private constructor(handle: bigint) {
 		this.handle = handle;
@@ -38,7 +40,7 @@ export class EndpointImpl implements Endpoint {
 			await createTauRPCProxy().endpoint.open_endpoint(
 				Array.from(secret_key),
 				person as unknown as JsonValue,
-				relay_configs as unknown as JsonValue[],
+				relay_configs,
 			),
 		);
 	}

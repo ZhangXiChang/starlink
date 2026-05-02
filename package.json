@@ -26,20 +26,20 @@
 		"android:build": "tauri android build --apk --split-per-abi --target aarch64"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.9",
+		"@biomejs/biome": "^2.4.14",
 		"@eslint/js": "^10.0.1",
-		"@playwright/test": "^1.58.2",
-		"@tailwindcss/vite": "^4.2.2",
-		"@tauri-apps/cli": "^2.10.1",
+		"@playwright/test": "^1.59.1",
+		"@tailwindcss/vite": "^4.2.4",
+		"@tauri-apps/cli": "^2.11.0",
 		"daisyui": "^5.5.19",
-		"eslint": "^10.1.0",
+		"eslint": "^10.3.0",
 		"npm-run-all2": "^8.0.4",
-		"prisma": "^7.6.0",
+		"prisma": "^7.8.0",
 		"prisma-kysely": "^3.1.0",
 		"rimraf": "^6.1.3",
-		"tailwindcss": "^4.2.2",
-		"typescript-eslint": "^8.57.2",
-		"wrangler": "^4.78.0"
+		"tailwindcss": "^4.2.4",
+		"typescript-eslint": "^8.59.1",
+		"wrangler": "^4.87.0"
 	},
 	"dependencies": {
 		"@floating-ui/dom": "^1.7.6",
@@ -47,17 +47,17 @@
 		"@solidjs/meta": "^0.29.4",
 		"@solidjs/router": "^0.16.1",
 		"@solidjs/start": "^1.3.2",
-		"@tanstack/solid-form": "^1.28.5",
-		"@tanstack/solid-virtual": "^3.13.23",
-		"@tauri-apps/api": "^2.10.1",
+		"@tanstack/solid-form": "^1.29.1",
+		"@tanstack/solid-virtual": "^3.13.24",
+		"@tauri-apps/api": "^2.11.0",
 		"@tauri-apps/plugin-notification": "^2.3.3",
 		"@tauri-apps/plugin-opener": "^2.5.3",
 		"@tauri-apps/plugin-os": "^2.3.2",
-		"animejs": "^4.3.6",
+		"animejs": "^4.4.1",
 		"arktype": "^2.2.0",
 		"comlink": "^4.4.2",
-		"kysely": "^0.28.14",
-		"lucide-solid": "^1.7.0",
+		"kysely": "^0.28.16",
+		"lucide-solid": "^1.14.0",
 		"octokit": "^5.0.5",
 		"opfs-worker": "^1.3.2",
 		"radash": "^12.1.1",
@@ -66,6 +66,6 @@
 		"taurpc": "^1.8.1",
 		"theme-change": "^2.5.0",
 		"vinxi": "^0.5.11",
-		"wa-sqlite": "github:rhashimoto/wa-sqlite#v1.0.9"
+		"wa-sqlite": "github:rhashimoto/wa-sqlite#v1.1.1"
 	}
 }

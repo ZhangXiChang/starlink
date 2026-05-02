@@ -7,16 +7,16 @@ edition = "2024"
 eyre = "0.6.12"
 log = "0.4.29"
 env_logger = "0.11.10"
-tokio = { version = "1.50.0", features = [
+tokio = { version = "1.52.1", features = [
     "parking_lot",
     "macros",
     "rt-multi-thread",
     "fs",
 ] }
-clap = { version = "4.6.0", features = ["derive"] }
+clap = { version = "4.6.1", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 toml = "=0.9.8"
-iroh-relay = { version = "0.97.0", features = ["server"] }
-rustls = { version = "0.23.37", default-features = false }
+iroh-relay = { version = "0.98.0", features = ["server"] }
+rustls = { version = "0.23.40", default-features = false }
 rustls-cert-file-reader = "0.4.2"
 rustls-cert-reloadable-resolver = "0.7.1"

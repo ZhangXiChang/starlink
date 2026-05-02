@@ -53,17 +53,14 @@ impl Endpoint {
         for config in relay_configs {
             relay_map.insert(
                 config.url.parse()?,
-                iroh::RelayConfig {
-                    url: config.url.parse()?,
-                    quic: Some(RelayQuicConfig {
-                        port: config.quic_port,
-                    }),
-                }
-                .into(),
+                Arc::new(iroh::RelayConfig::new(
+                    config.url.parse()?,
+                    Some(RelayQuicConfig::new(config.quic_port)),
+                )),
             );
         }
         #[allow(unused_mut)]
-        let mut endpoint_builder = iroh::Endpoint::empty_builder()
+        let mut endpoint_builder = iroh::endpoint::Builder::empty()
             .relay_mode(RelayMode::Custom(relay_map))
             .address_lookup(PkarrPublisher::n0_dns())
             .address_lookup(PkarrResolver::n0_dns());
@@ -177,9 +174,7 @@ impl Endpoint {
 }
 
 pub fn generate_secret_key() -> Vec<u8> {
-    iroh::SecretKey::generate(&mut rand::rng())
-        .to_bytes()
-        .to_vec()
+    iroh::SecretKey::generate().to_bytes().to_vec()
 }
 pub fn get_secret_key_id(secret_key: Vec<u8>) -> Result<String> {
     Ok(
