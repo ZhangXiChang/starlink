@@ -20,7 +20,6 @@ runs:
     - name: 初始化项目
       shell: bash
       run: |
-        rustup target install wasm32-unknown-unknown
         cargo binstall wasm-pack
         bun run install:pre
         bun install
