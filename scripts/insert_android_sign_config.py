@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 from os import path
 from shutil import copyfile
-from typing import Optional
+from typing import Optional, TypeGuard
 from kopyt import Parser
 from kopyt.node import (
     CallSuffix,
@@ -14,11 +14,13 @@ from kopyt.node import (
 from kopyt.position import Position
 
 
-def is_postfix_unary_expression(node) -> bool:
+def is_postfix_unary_expression(node) -> TypeGuard[PostfixUnaryExpression]:
     return isinstance(node, PostfixUnaryExpression)
 
 
-def is_simple_identifier(node, value: Optional[str] = None) -> bool:
+def is_simple_identifier(
+    node, value: Optional[str] = None
+) -> TypeGuard[SimpleIdentifier]:
     if not isinstance(node, SimpleIdentifier):
         return False
     if value is not None and node.value != value:
@@ -26,7 +28,7 @@ def is_simple_identifier(node, value: Optional[str] = None) -> bool:
     return True
 
 
-def is_call_suffix(node) -> bool:
+def is_call_suffix(node) -> TypeGuard[CallSuffix]:
     return isinstance(node, CallSuffix)
 
 
@@ -34,6 +36,18 @@ def get_call_suffix_with_lambda(node) -> Optional[CallSuffix]:
     if is_call_suffix(node) and node.lambda_expression is not None:
         return node
     return None
+
+
+def _has_release_value_arg(arguments) -> bool:
+    """Check if any ValueArgument wraps a LineStringLiteral '"release"'."""
+    for arg in arguments:
+        if not isinstance(arg, ValueArgument):
+            continue
+        if not isinstance(arg.value, LineStringLiteral):
+            continue
+        if arg.value.value == '"release"':
+            return True
+    return False
 
 
 def find_suffixes_with_lambda(postfix_node: PostfixUnaryExpression) -> list[CallSuffix]:
@@ -68,14 +82,8 @@ def find_call_suffix_with_release_arg(
             continue
         if suffix.arguments is None:
             continue
-
-        for arg in suffix.arguments:
-            if not isinstance(arg, ValueArgument):
-                continue
-            if not isinstance(arg.value, LineStringLiteral):
-                continue
-            if arg.value.value == '"release"':
-                return suffix
+        if _has_release_value_arg(suffix.arguments):
+            return suffix
 
     return None
 
@@ -87,6 +95,7 @@ def find_release_buildtype_suffix(
         call_suffix = get_call_suffix_with_lambda(buildtypes_suffix)
         if not call_suffix:
             continue
+        assert call_suffix.lambda_expression is not None
 
         buildtypes_lambda = call_suffix.lambda_expression.value
         buildtypes_expr = find_expression_by_name(
@@ -138,10 +147,10 @@ signing_configs_code = """signingConfigs {
 use_signing_configs_code = 'signingConfig = signingConfigs.getByName("release")'
 
 for root_statement in gradle_build_script.statements:
-    if not is_postfix_unary_expression(root_statement.statement):
+    android_expr = root_statement.statement
+    if not is_postfix_unary_expression(android_expr):
         continue
 
-    android_expr = root_statement.statement
     if not is_simple_identifier(android_expr.expression, "android"):
         continue
 
@@ -150,11 +159,13 @@ for root_statement in gradle_build_script.statements:
         continue
 
     android_call = call_suffixes[0]
-    android_lambda = android_call.lambda_expression.value
+    android_lambda = android_call.lambda_expression
+    if android_lambda is None:
+        continue
 
-    android_lambda.statements = [Parser(signing_configs_code).parse_statement()] + list(
-        android_lambda.statements
-    )
+    android_lambda.value.statements = [
+        Parser(signing_configs_code).parse_statement()
+    ] + list(android_lambda.value.statements)
 
     release_suffix = find_release_buildtype_suffix(android_expr)
     if release_suffix and release_suffix.lambda_expression:
