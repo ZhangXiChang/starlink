@@ -3,17 +3,15 @@ name = "scripts"
 version = "0.1.0"
 requires-python = ">=3.14"
 
-dependencies = ["kopyt>=0.0.2"]
-
-[dependency-groups]
-lint = ["basedpyright>=1.39.3"]
-jupyter = [
+dependencies = [
     "black>=26.3.1",
     "isort>=8.0.1",
     "jupyterlab>=4.5.7",
     "jupyterlab-code-formatter>=3.0.3",
     "jupyterlab-lsp>=5.3.0",
     "python-lsp-server>=1.14.0",
+    "basedpyright>=1.39.3",
+    "kopyt>=0.0.2",
 ]
 
 [tool.pyright]
