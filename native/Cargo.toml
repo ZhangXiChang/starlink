@@ -16,7 +16,7 @@ utils = { path = "../crates/utils" }
 endpoint = { path = "../crates/endpoint" }
 person-protocol = { path = "../crates/person-protocol" }
 
-tauri = { version = "2.11.0", features = ["test"] }
+tauri = { version = "2.11.1", features = ["test"] }
 serde_json = "1.0.149"
 taurpc = "0.7.1"
 specta = { version = "=2.0.0-rc.22", features = ["serde_json"] }
