@@ -60,7 +60,7 @@ impl Endpoint {
             );
         }
         #[allow(unused_mut)]
-        let mut endpoint_builder = iroh::endpoint::Builder::empty()
+        let mut endpoint_builder = iroh::endpoint::Builder::new(iroh::endpoint::presets::Minimal)
             .relay_mode(RelayMode::Custom(relay_map))
             .address_lookup(PkarrPublisher::n0_dns())
             .address_lookup(PkarrResolver::n0_dns());
