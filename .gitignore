@@ -8,6 +8,7 @@
 /.virtual_documents/
 /test-results/
 /playwright-report/
+/.playwright-mcp/
 /.sisyphus/
 
 /public/db_schema.sql
