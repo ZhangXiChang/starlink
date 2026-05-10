@@ -29,10 +29,12 @@ export type Message = {
 };
 
 export type FriendRequestStatus = "pending" | "accepted" | "rejected";
+export type FriendRequestDirection = "incoming" | "outgoing";
 
 export type FriendRequest = {
 	owner_id: string;
 	remote_id: string;
+	direction: FriendRequestDirection;
 	name: string;
 	avatar?: Uint8Array;
 	bio: string;

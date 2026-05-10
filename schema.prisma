@@ -28,7 +28,7 @@ model friend {
 }
 
 model chat_message {
-  id           String @id
+  id           String   @id
   owner_id     String
   chat_user_id String
   sender_id    String
@@ -46,13 +46,14 @@ model chat_message {
 model friend_request {
   owner_id     String
   remote_id    String
+  direction    String
   name         String
   avatar       Bytes?
   bio          String
-  status       String   @default("pending")
-  created_at   DateTime @default(now())
+  status       String    @default("pending")
+  created_at   DateTime  @default(now())
   responded_at DateTime?
 
-  @@id([owner_id, remote_id])
+  @@id([owner_id, remote_id, direction])
   @@index([owner_id, status, created_at])
 }
