@@ -1,17 +1,56 @@
 import { createAsync } from "@solidjs/router";
 import { createVirtualizer } from "@tanstack/solid-virtual";
 import { UserIcon } from "lucide-solid";
-import { For, Show, Suspense } from "solid-js";
+import { For, onMount, Show, Suspense } from "solid-js";
 import { twMerge } from "tailwind-merge";
-import type { Message, User } from "~/lib/endpoint/types";
+import type {
+	ChatConnectionState,
+	ChatConnectionStatus,
+	Message,
+	User,
+} from "~/lib/endpoint/types";
 import { QueryBuilder } from "~/lib/query_builder";
-import { MainContext, ShellContext, use_context } from "../context";
+import {
+	HomeContext,
+	MainContext,
+	ShellContext,
+	use_context,
+} from "../context";
 import Image from "../widgets/image";
+
+function chat_connection_label(status: ChatConnectionStatus) {
+	switch (status) {
+		case "idle":
+			return "未连接";
+		case "connecting":
+			return "连接中";
+		case "connected":
+			return "已连接";
+		case "rejected":
+			return "连接被拒绝";
+		case "error":
+			return "连接失败";
+	}
+}
+
+function chat_connection_badge_class(state: ChatConnectionState) {
+	return twMerge(
+		"badge badge-sm shrink-0",
+		state.status === "connected" && "badge-success",
+		state.status === "connecting" && "badge-info",
+		state.status === "rejected" && "badge-warning",
+		state.status === "error" && "badge-error",
+	);
+}
 
 export default function ChatBar(props: { chat_user: User }) {
 	const shell_store = use_context(ShellContext);
 	const main_store = use_context(MainContext);
+	const home_store = use_context(HomeContext);
 	const [user] = shell_store.user;
+	onMount(() => void home_store.connect_chat(props.chat_user.id));
+	const connection_state = () =>
+		home_store.chat_connection_state(props.chat_user.id);
 	const messages = createAsync(async () => {
 		const u = user();
 		if (!u) throw new Error("用户不存在");
@@ -60,13 +99,18 @@ export default function ChatBar(props: { chat_user: User }) {
 						)}
 					</Show>
 				</div>
-				<div class="flex flex-col">
+				<div class="flex min-w-0 flex-col">
 					<span class="text-base-content font-bold">
 						{props.chat_user.name}
 					</span>
-					<span class="text-xs text-base-content/60">
-						{props.chat_user.bio}
-					</span>
+					<div class="flex min-w-0 items-center gap-2">
+						<span class="truncate text-xs text-base-content/60">
+							{props.chat_user.bio}
+						</span>
+						<span class={chat_connection_badge_class(connection_state())}>
+							{chat_connection_label(connection_state().status)}
+						</span>
+					</div>
 				</div>
 			</div>
 			<Suspense>
@@ -140,6 +184,7 @@ export default function ChatBar(props: { chat_user: User }) {
 			<div class="flex">
 				<textarea
 					class="textarea flex-1 field-sizing-content resize-none min-h-0"
+					disabled={connection_state().status !== "connected"}
 					placeholder="按回车发送消息"
 				/>
 			</div>

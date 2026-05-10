@@ -15,6 +15,19 @@ export type RelayConfig = {
 
 export type MessageStatus = "sending" | "sent" | "failed" | "received";
 
+export type ChatConnectionStatus =
+	| "idle"
+	| "connecting"
+	| "connected"
+	| "rejected"
+	| "error";
+
+export type ChatConnectionState = {
+	status: ChatConnectionStatus;
+	connection?: bigint;
+	error?: string;
+};
+
 export type Message = {
 	id: string;
 	owner_id: string;
