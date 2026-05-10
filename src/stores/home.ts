@@ -78,9 +78,12 @@ export class HomeStore {
 				)();
 				if (this.closed) return;
 				if (event_error) {
-					shell_store.toaster.popup(`好友请求监听失败：${event_error.message}`, {
-						type: "error",
-					});
+					shell_store.toaster.popup(
+						`好友请求监听失败：${event_error.message}`,
+						{
+							type: "error",
+						},
+					);
 					return;
 				}
 				if (event_type === "FriendRequest") {

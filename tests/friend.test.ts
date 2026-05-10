@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import type { CompiledQuery } from "kysely";
 import type { User } from "../src/lib/endpoint/types";
 import {
@@ -45,10 +45,7 @@ async function register_and_login(page: Page, name: string) {
 
 test.describe("好友功能", () => {
 	test("添加好友表单会校验空用户和当前用户", async ({ page }) => {
-		const owner_id = await register_and_login(
-			page,
-			`好友测试-${Date.now()}`,
-		);
+		const owner_id = await register_and_login(page, `好友测试-${Date.now()}`);
 
 		await page.locator('label[aria-label="好友"]').click();
 		await page.getByRole("button", { name: "添加好友" }).click();
@@ -59,7 +56,9 @@ test.describe("好友功能", () => {
 
 		await add_friend_dialog.getByLabel("用户ID").fill(owner_id);
 		await add_friend_dialog.getByRole("button", { name: "搜索" }).click();
-		await expect(add_friend_dialog.getByText("不能添加自己为好友")).toBeVisible();
+		await expect(
+			add_friend_dialog.getByText("不能添加自己为好友"),
+		).toBeVisible();
 	});
 
 	test("普通 toast 会自动关闭，操作 toast 保持到手动关闭", async () => {
