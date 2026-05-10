@@ -1,6 +1,11 @@
 import { createTauRPCProxy, type JsonValue } from "~/generated/ipc_bindings";
 import type { Endpoint, EndpointModule } from "./interface";
-import type { Person, PersonProtocolEvent, RelayConfig } from "./types";
+import type {
+	ChatTextMessage,
+	Person,
+	PersonProtocolEvent,
+	RelayConfig,
+} from "./types";
 
 export class EndpointModuleImpl implements EndpointModule {
 	init() {
@@ -72,6 +77,19 @@ export class EndpointImpl implements Endpoint {
 	}
 	async request_chat(id: string) {
 		return await createTauRPCProxy().endpoint.request_chat(this.handle, id);
+	}
+	async send_chat_text_message(connection: bigint, message: ChatTextMessage) {
+		await createTauRPCProxy().endpoint.send_chat_text_message(
+			this.handle,
+			connection,
+			message,
+		);
+	}
+	async next_chat_text_message(connection: bigint) {
+		return (await createTauRPCProxy().endpoint.next_chat_text_message(
+			this.handle,
+			connection,
+		)) as unknown as ChatTextMessage;
 	}
 	async subscribe_group(ticket: string) {
 		return await createTauRPCProxy().endpoint.subscribe_group(

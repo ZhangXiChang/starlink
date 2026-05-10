@@ -28,7 +28,7 @@ model friend {
 }
 
 model chat_message {
-  id           String   @id
+  id           String
   owner_id     String
   chat_user_id String
   sender_id    String
@@ -39,6 +39,7 @@ model chat_message {
   retry_count  Int      @default(0)
   last_error   String?
 
+  @@id([owner_id, id])
   @@index([owner_id, chat_user_id, created_at])
   @@index([owner_id, status])
 }

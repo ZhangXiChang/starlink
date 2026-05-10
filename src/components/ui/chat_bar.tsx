@@ -1,15 +1,15 @@
 import { createAsync } from "@solidjs/router";
-import { createVirtualizer } from "@tanstack/solid-virtual";
 import { UserIcon } from "lucide-solid";
-import { For, onMount, Show, Suspense } from "solid-js";
+import { createSignal, For, onMount, Show, Suspense } from "solid-js";
 import { twMerge } from "tailwind-merge";
 import type {
 	ChatConnectionState,
 	ChatConnectionStatus,
 	Message,
+	MessageStatus,
 	User,
 } from "~/lib/endpoint/types";
-import { QueryBuilder } from "~/lib/query_builder";
+import { list_chat_messages } from "~/lib/messages";
 import {
 	HomeContext,
 	MainContext,
@@ -43,43 +43,55 @@ function chat_connection_badge_class(state: ChatConnectionState) {
 	);
 }
 
+function message_status_label(status: MessageStatus) {
+	switch (status) {
+		case "sending":
+			return "发送中";
+		case "sent":
+			return "已发送";
+		case "failed":
+			return "发送失败";
+		case "received":
+			return "已接收";
+	}
+}
+
+function format_message_time(value: string) {
+	return new Date(value).toLocaleTimeString("zh-CN", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+}
+
 export default function ChatBar(props: { chat_user: User }) {
 	const shell_store = use_context(ShellContext);
 	const main_store = use_context(MainContext);
 	const home_store = use_context(HomeContext);
 	const [user] = shell_store.user;
+	const [draft_message, set_draft_message] = createSignal("");
 	onMount(() => void home_store.connect_chat(props.chat_user.id));
 	const connection_state = () =>
 		home_store.chat_connection_state(props.chat_user.id);
 	const messages = createAsync(async () => {
 		const u = user();
 		if (!u) throw new Error("用户不存在");
-		return await main_store.sqlite.query<Message>(
-			QueryBuilder.selectFrom("chat_message")
-				.select([
-					"id",
-					"owner_id",
-					"chat_user_id",
-					"sender_id",
-					"content",
-					"status",
-					"created_at",
-					"updated_at",
-					"retry_count",
-					"last_error",
-				])
-				.where("owner_id", "=", u.id)
-				.where("chat_user_id", "=", props.chat_user.id)
-				.orderBy("created_at", "asc")
-				.compile(),
+		home_store.message_revision();
+		return await list_chat_messages(
+			main_store.sqlite,
+			u.id,
+			props.chat_user.id,
 		);
 	});
-	let message_list_ref: HTMLDivElement | undefined;
-	const message_list_virtualizer = createVirtualizer({
-		getScrollElement: () => message_list_ref ?? null,
-		count: messages()?.length ?? 0,
-		estimateSize: () => 90,
-	});
+	const send_draft_message = () => {
+		const content = draft_message().trim();
+		if (content === "") return;
+		set_draft_message("");
+		void home_store.send_chat_message(props.chat_user.id, content);
+	};
+	const message_sender_name = (message: Message) =>
+		message.sender_id === props.chat_user.id
+			? props.chat_user.name
+			: user()?.name;
 	return (
 		<div class="flex-1 flex flex-col p-2 pt-0 gap-2">
 			<div class="flex items-center border rounded-box bg-base-100 border-neutral-200 p-2 gap-2">
@@ -114,70 +126,73 @@ export default function ChatBar(props: { chat_user: User }) {
 				</div>
 			</div>
 			<Suspense>
-				<div ref={message_list_ref} class="flex-1 overflow-y-auto">
-					<div
-						class="relative w-full"
-						style={{ height: `${message_list_virtualizer.getTotalSize()}px` }}
-					>
-						<div
-							class="absolute w-full flex flex-col px-1 gap-4"
-							style={{
-								transform: `translateY(${message_list_virtualizer.getVirtualItems().at(0)?.start ?? 0}px)`,
-							}}
-						>
-							<For each={message_list_virtualizer.getVirtualItems()}>
-								{(v) => (
-									<div
-										class={twMerge(
-											"chat p-0",
-											messages()?.at(v.index)?.sender_id === props.chat_user.id
-												? "chat-start"
-												: "chat-end",
-										)}
-									>
-										<div class="chat-image avatar">
-											<Show
-												keyed
-												when={
-													messages()?.at(v.index)?.sender_id ===
-													props.chat_user.id
-														? props.chat_user.avatar
-														: user()?.avatar
-												}
-												fallback={
-													<UserIcon class="size-10 rounded-full bg-base-300" />
-												}
-											>
-												{(avatar) => (
-													<Image class="size-10 rounded-full" image={avatar} />
-												)}
-											</Show>
-										</div>
-										<div class="chat-header items-center">
-											<span
-												class={twMerge(
-													"text-sm text-base-content font-bold",
-													messages()?.at(v.index)?.sender_id ===
-														props.chat_user.id
-														? undefined
-														: "order-1",
-												)}
-											>
-												{messages()?.at(v.index)?.sender_id ===
-												props.chat_user.id
-													? props.chat_user.name
-													: user()?.name}
-											</span>
-											<time class="text-base-content/60">12:45</time>
-										</div>
-										<span class="border rounded-box bg-base-100 border-neutral-200 p-2">
-											{messages()?.at(v.index)?.content}
-										</span>
-										<div class="chat-footer text-base-content/60">已读</div>
+				<div class="flex-1 overflow-y-auto">
+					<div class="flex min-h-full flex-col px-1 gap-4">
+						<For each={messages()}>
+							{(message) => (
+								<div
+									class={twMerge(
+										"chat p-0",
+										message.sender_id === props.chat_user.id
+											? "chat-start"
+											: "chat-end",
+									)}
+								>
+									<div class="chat-image avatar">
+										<Show
+											keyed
+											when={
+												message.sender_id === props.chat_user.id
+													? props.chat_user.avatar
+													: user()?.avatar
+											}
+											fallback={
+												<UserIcon class="size-10 rounded-full bg-base-300" />
+											}
+										>
+											{(avatar) => (
+												<Image class="size-10 rounded-full" image={avatar} />
+											)}
+										</Show>
 									</div>
-								)}
-							</For>
-						</div>
+									<div class="chat-header items-center">
+										<span
+											class={twMerge(
+												"text-sm text-base-content font-bold",
+												message.sender_id === props.chat_user.id
+													? undefined
+													: "order-1",
+											)}
+										>
+											{message_sender_name(message)}
+										</span>
+										<time class="text-base-content/60">
+											{format_message_time(message.created_at)}
+										</time>
+									</div>
+									<span class="border rounded-box bg-base-100 border-neutral-200 p-2">
+										{message.content}
+									</span>
+									<div class="chat-footer flex items-center gap-2 text-base-content/60">
+										<span>{message_status_label(message.status)}</span>
+										<Show when={message.status === "failed"}>
+											<button
+												class="link link-error"
+												aria-label="重试发送消息"
+												onClick={() =>
+													void home_store.retry_chat_message(
+														props.chat_user.id,
+														message.id,
+													)
+												}
+											>
+												重试
+											</button>
+										</Show>
+									</div>
+								</div>
+							)}
+						</For>
 					</div>
 				</div>
 			</Suspense>
@@ -186,6 +201,13 @@ export default function ChatBar(props: { chat_user: User }) {
 					class="textarea flex-1 field-sizing-content resize-none min-h-0"
 					disabled={connection_state().status !== "connected"}
 					placeholder="按回车发送消息"
+					value={draft_message()}
+					onInput={(event) => set_draft_message(event.currentTarget.value)}
+					onKeyDown={(event) => {
+						if (event.key !== "Enter" || event.shiftKey) return;
+						event.preventDefault();
+						send_draft_message();
+					}}
 				/>
 			</div>
 		</div>

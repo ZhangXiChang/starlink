@@ -144,4 +144,58 @@ test.describe("HomeStore 事件循环", () => {
 			timeout: 30_000,
 		});
 	});
+
+	test("一对一文本消息会发送、接收、落库并刷新消息入口", async ({
+		page,
+		context,
+	}) => {
+		test.setTimeout(120_000);
+		const unique = `${Date.now()}-${test.info().workerIndex}`;
+		const sender_name = `消息甲-${unique}`;
+		const receiver_name = `消息乙-${unique}`;
+		const message = `你好，阶段4-${unique}`;
+
+		await register_user(page, sender_name);
+		const receiver_id = await register_user(page, receiver_name);
+
+		const receiver_page = await context.newPage();
+		await login_as(receiver_page, receiver_name);
+		await login_as(page, sender_name);
+
+		await become_friends(
+			page,
+			receiver_page,
+			receiver_id,
+			sender_name,
+			receiver_name,
+		);
+
+		await page
+			.getByRole("button", { name: `打开与 ${receiver_name} 的聊天` })
+			.click();
+		await expect(page.getByText("已连接")).toBeVisible({ timeout: 30_000 });
+
+		await receiver_page
+			.getByRole("button", { name: `打开与 ${sender_name} 的聊天` })
+			.click();
+		await expect(receiver_page.getByText("已连接")).toBeVisible({
+			timeout: 30_000,
+		});
+
+		await page.getByPlaceholder("按回车发送消息").fill(message);
+		await page.getByPlaceholder("按回车发送消息").press("Enter");
+
+		await expect(page.getByText(message)).toBeVisible({ timeout: 30_000 });
+		await expect(page.getByText("已发送")).toBeVisible();
+		await expect(receiver_page.getByText(message)).toBeVisible({
+			timeout: 30_000,
+		});
+
+		await receiver_page.locator('label[aria-label="消息"]').click();
+		const message_entry = receiver_page.getByRole("button", {
+			name: `打开与 ${sender_name} 的消息`,
+		});
+		await expect(message_entry).toBeVisible();
+		await expect(message_entry.getByText(message)).toBeVisible();
+	});
 });

@@ -4,7 +4,11 @@ import wasm_init, {
 	get_secret_key_id as wasm_get_secret_key_id,
 } from "@pupu/endpoint";
 import wasm_url from "@pupu/endpoint/endpoint_wasm_bg.wasm?url";
-import type { Person, RelayConfig } from "~/lib/endpoint/types";
+import type {
+	ChatTextMessage,
+	Person,
+	RelayConfig,
+} from "~/lib/endpoint/types";
 import type { Endpoint, EndpointModule } from "./interface";
 import type { PersonProtocolEvent } from "./types";
 
@@ -63,6 +67,14 @@ export class EndpointImpl implements Endpoint {
 	async request_chat(id: string) {
 		const a = await this.endpoint.request_chat(id);
 		return a != undefined ? (a as unknown as bigint) : null;
+	}
+	async send_chat_text_message(connection: bigint, message: ChatTextMessage) {
+		await this.endpoint.send_chat_text_message(Number(connection), message);
+	}
+	async next_chat_text_message(connection: bigint) {
+		return (await this.endpoint.next_chat_text_message(
+			Number(connection),
+		)) as ChatTextMessage;
 	}
 	async subscribe_group(ticket: string) {
 		return (await this.endpoint.subscribe_group(ticket)) as unknown as bigint;

@@ -29,6 +29,15 @@ pub trait EndpointApi {
     async fn request_person(handle: usize, id: String) -> Result<serde_json::Value, String>;
     async fn request_friend(handle: usize, id: String) -> Result<bool, String>;
     async fn request_chat(handle: usize, id: String) -> Result<Option<usize>, String>;
+    async fn send_chat_text_message(
+        handle: usize,
+        connection: usize,
+        message: serde_json::Value,
+    ) -> Result<(), String>;
+    async fn next_chat_text_message(
+        handle: usize,
+        connection: usize,
+    ) -> Result<serde_json::Value, String>;
     async fn subscribe_group(handle: usize, ticket: String) -> Result<usize, String>;
 }
 
@@ -171,6 +180,41 @@ impl EndpointApi for EndpointApiImpl {
             .request_chat(id)
             .await
             .mse()?)
+    }
+    async fn send_chat_text_message(
+        self,
+        handle: usize,
+        connection: usize,
+        message: serde_json::Value,
+    ) -> Result<(), String> {
+        async {
+            self.endpoint_pool
+                .get_owned(handle)
+                .get()?
+                .send_chat_text_message(connection, serde_json::from_value(message)?)
+                .await?;
+            eyre::Ok(())
+        }
+        .await
+        .mse()
+    }
+    async fn next_chat_text_message(
+        self,
+        handle: usize,
+        connection: usize,
+    ) -> Result<serde_json::Value, String> {
+        async {
+            eyre::Ok(serde_json::to_value(
+                &self
+                    .endpoint_pool
+                    .get_owned(handle)
+                    .get()?
+                    .next_chat_text_message(connection)
+                    .await?,
+            )?)
+        }
+        .await
+        .mse()
     }
     async fn subscribe_group(self, handle: usize, ticket: String) -> Result<usize, String> {
         Ok(self

@@ -3,11 +3,19 @@ import { type Accessor, createSignal, type Setter } from "solid-js";
 import type { Endpoint } from "~/lib/endpoint/interface";
 import type {
 	ChatConnectionState,
+	ChatTextMessage,
+	Message,
 	Person,
 	PersonProtocolEvent,
 	User,
 } from "~/lib/endpoint/types";
 import { add_friend, friend_exists, save_friend_request } from "~/lib/friends";
+import {
+	create_chat_message_id,
+	get_chat_message,
+	save_chat_message,
+	update_chat_message_status,
+} from "~/lib/messages";
 import { QueryBuilder } from "~/lib/query_builder";
 import type { MainStore } from "./main";
 import type { ShellStore } from "./shell";
@@ -16,25 +24,41 @@ export class HomeStore {
 	endpoint;
 	set_user;
 	friend_list_revision;
+	message_revision;
 	chat_connections;
+	private shell_store;
+	private main_store;
+	private owner_id;
 	private set_friend_list_revision;
+	private set_message_revision;
 	private set_chat_connections;
 	private event_loop?: Promise<void>;
+	private chat_message_receivers = new Map<string, Promise<void>>();
 	private cleanup_handlers = new Set<() => void>();
 	private closed = false;
 
 	private constructor(
 		endpoint: Endpoint,
+		shell_store: ShellStore,
+		main_store: MainStore,
+		owner_id: string,
 		set_user: Setter<User | undefined>,
 		friend_list_revision: Accessor<number>,
 		set_friend_list_revision: Setter<number>,
+		message_revision: Accessor<number>,
+		set_message_revision: Setter<number>,
 		chat_connections: Accessor<Map<string, ChatConnectionState>>,
 		set_chat_connections: Setter<Map<string, ChatConnectionState>>,
 	) {
 		this.endpoint = endpoint;
+		this.shell_store = shell_store;
+		this.main_store = main_store;
+		this.owner_id = owner_id;
 		this.set_user = set_user;
 		this.friend_list_revision = friend_list_revision;
 		this.set_friend_list_revision = set_friend_list_revision;
+		this.message_revision = message_revision;
+		this.set_message_revision = set_message_revision;
 		this.chat_connections = chat_connections;
 		this.set_chat_connections = set_chat_connections;
 	}
@@ -66,14 +90,20 @@ export class HomeStore {
 		const [, set_user] = shell_store.user;
 		set_user({ id: user_id, ...person });
 		const [friend_list_revision, set_friend_list_revision] = createSignal(0);
+		const [message_revision, set_message_revision] = createSignal(0);
 		const [chat_connections, set_chat_connections] = createSignal<
 			Map<string, ChatConnectionState>
 		>(new Map());
 		const store = new HomeStore(
 			endpoint,
+			shell_store,
+			main_store,
+			user_id,
 			set_user,
 			friend_list_revision,
 			set_friend_list_revision,
+			message_revision,
+			set_message_revision,
 			chat_connections,
 			set_chat_connections,
 		);
@@ -82,6 +112,9 @@ export class HomeStore {
 	}
 	refresh_friend_list() {
 		this.set_friend_list_revision((revision) => revision + 1);
+	}
+	refresh_messages() {
+		this.set_message_revision((revision) => revision + 1);
 	}
 	chat_connection_state(remote_id: string): ChatConnectionState {
 		return this.chat_connections().get(remote_id) ?? { status: "idle" };
@@ -122,6 +155,135 @@ export class HomeStore {
 			status: "connected",
 			connection,
 		});
+		this.start_chat_message_receiver(remote_id, connection);
+	}
+	async send_chat_message(remote_id: string, raw_content: string) {
+		const content = raw_content.trim();
+		if (this.closed || content === "") return;
+		const created_at = new Date().toISOString();
+		const message: Message = {
+			id: create_chat_message_id(),
+			owner_id: this.owner_id,
+			chat_user_id: remote_id,
+			sender_id: this.owner_id,
+			content,
+			status: "sending",
+			created_at,
+			updated_at: created_at,
+			retry_count: 0,
+			last_error: null,
+		};
+		await save_chat_message(this.main_store.sqlite, message);
+		this.refresh_messages();
+		await this.dispatch_chat_message(remote_id, message);
+	}
+	async retry_chat_message(remote_id: string, message_id: string) {
+		if (this.closed) return;
+		const message = await get_chat_message(
+			this.main_store.sqlite,
+			this.owner_id,
+			message_id,
+		);
+		if (!message) return;
+		await update_chat_message_status(this.main_store.sqlite, {
+			owner_id: this.owner_id,
+			id: message.id,
+			status: "sending",
+			last_error: null,
+		});
+		this.refresh_messages();
+		await this.dispatch_chat_message(remote_id, {
+			...message,
+			status: "sending",
+		});
+	}
+	private async dispatch_chat_message(remote_id: string, message: Message) {
+		const state = this.chat_connection_state(remote_id);
+		if (state.status !== "connected" || state.connection === undefined) {
+			await this.fail_chat_message(message, "聊天未连接");
+			return;
+		}
+		const envelope: ChatTextMessage = {
+			id: message.id,
+			sender_id: this.owner_id,
+			created_at: message.created_at,
+			content: message.content,
+		};
+		const [send_error] = await tryit(() =>
+			this.endpoint.send_chat_text_message(
+				state.connection as bigint,
+				envelope,
+			),
+		)();
+		if (this.closed) return;
+		if (send_error) {
+			await this.fail_chat_message(message, send_error.message);
+			return;
+		}
+		await update_chat_message_status(this.main_store.sqlite, {
+			owner_id: this.owner_id,
+			id: message.id,
+			status: "sent",
+			last_error: null,
+		});
+		this.refresh_messages();
+	}
+	private async fail_chat_message(message: Message, error: string) {
+		await update_chat_message_status(this.main_store.sqlite, {
+			owner_id: this.owner_id,
+			id: message.id,
+			status: "failed",
+			retry_count: message.retry_count + 1,
+			last_error: error,
+		});
+		this.refresh_messages();
+	}
+	private start_chat_message_receiver(remote_id: string, connection: bigint) {
+		if (this.chat_message_receivers.has(remote_id)) return;
+		const receiver = this.run_chat_message_receiver(
+			remote_id,
+			connection,
+		).finally(() => this.chat_message_receivers.delete(remote_id));
+		this.chat_message_receivers.set(remote_id, receiver);
+	}
+	private async run_chat_message_receiver(
+		remote_id: string,
+		connection: bigint,
+	) {
+		while (!this.closed) {
+			const [receive_error, message] = await tryit(() =>
+				this.endpoint.next_chat_text_message(connection),
+			)();
+			if (this.closed) return;
+			if (receive_error) {
+				const current = this.chat_connection_state(remote_id);
+				if (current.connection === connection) {
+					this.set_chat_connection_state(remote_id, {
+						status: "error",
+						error: receive_error.message,
+					});
+				}
+				this.shell_store.toaster.popup(
+					`接收聊天消息失败：${receive_error.message}`,
+					{ type: "error" },
+				);
+				return;
+			}
+			const updated_at = new Date().toISOString();
+			await save_chat_message(this.main_store.sqlite, {
+				id: message.id,
+				owner_id: this.owner_id,
+				chat_user_id: remote_id,
+				sender_id: remote_id,
+				content: message.content,
+				status: "received",
+				created_at: message.created_at,
+				updated_at,
+				retry_count: 0,
+				last_error: null,
+			});
+			this.refresh_messages();
+		}
 	}
 	private watch_person_protocol_events(
 		shell_store: ShellStore,
@@ -286,12 +448,14 @@ export class HomeStore {
 			status: "connected",
 			connection,
 		});
+		this.start_chat_message_receiver(remote_id, connection);
 	}
 	async cleanup() {
 		this.closed = true;
 		for (const cleanup_handler of [...this.cleanup_handlers]) cleanup_handler();
 		const [close_error] = await tryit(() => this.endpoint.close())();
 		if (this.event_loop) await tryit(() => this.event_loop)();
+		await tryit(() => Promise.all([...this.chat_message_receivers.values()]))();
 		this.set_user();
 		if (close_error) throw close_error;
 	}

@@ -1,4 +1,8 @@
-import type { Person, RelayConfig } from "~/lib/endpoint/types";
+import type {
+	ChatTextMessage,
+	Person,
+	RelayConfig,
+} from "~/lib/endpoint/types";
 import type { Init } from "../interface";
 import type { PersonProtocolEvent } from "./types";
 
@@ -20,5 +24,10 @@ export interface Endpoint {
 	request_person(id: string): Promise<Person>;
 	request_friend(id: string): Promise<boolean>;
 	request_chat(id: string): Promise<bigint | null>;
+	send_chat_text_message(
+		connection: bigint,
+		message: ChatTextMessage,
+	): Promise<void>;
+	next_chat_text_message(connection: bigint): Promise<ChatTextMessage>;
 	subscribe_group(ticket: string): Promise<bigint>;
 }

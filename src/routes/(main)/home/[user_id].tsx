@@ -8,6 +8,7 @@ import {
 } from "~/components/context";
 import ChatBar from "~/components/ui/chat_bar";
 import FriendList from "~/components/ui/friend_list";
+import MessageList from "~/components/ui/message_list";
 import SidebarButtonGroup, {
 	type SidebarButtonGroupState,
 } from "~/components/ui/sidebar_button_group";
@@ -39,11 +40,7 @@ export default function Home() {
 								<div class="absolute inset-0 right-4 max-w-80 flex flex-col bg-base-100 border border-base-300 rounded-t-box">
 									<Switch>
 										<Match when={sidebar_button_group_state() === "message"}>
-											<div class="flex-1 flex items-center justify-center">
-												<span class="text-base-content font-bold">
-													消息功能待实现
-												</span>
-											</div>
+											<MessageList set_chat_user={set_chat_user} />
 										</Match>
 										<Match when={sidebar_button_group_state() === "friend"}>
 											<FriendList set_chat_user={set_chat_user} />

@@ -61,6 +61,21 @@ impl Endpoint {
     pub async fn request_chat(&self, id: String) -> Result<Option<usize>, JsError> {
         self.0.request_chat(id).await.mje()
     }
+    pub async fn send_chat_text_message(
+        &self,
+        connection: usize,
+        message: JsValue,
+    ) -> Result<(), JsError> {
+        self.0
+            .send_chat_text_message(connection, serde_wasm_bindgen::from_value(message)?)
+            .await
+            .mje()
+    }
+    pub async fn next_chat_text_message(&self, connection: usize) -> Result<JsValue, JsError> {
+        Ok(serde_wasm_bindgen::to_value(
+            &self.0.next_chat_text_message(connection).await.mje()?,
+        )?)
+    }
     pub async fn subscribe_group(&self, ticket: String) -> Result<usize, JsError> {
         self.0.subscribe_group(ticket).await.mje()
     }

@@ -15,7 +15,7 @@ use iroh_gossip::{
 };
 use iroh_relay::RelayQuicConfig;
 use parking_lot::Mutex;
-use person_protocol::{Person, PersonProtocol};
+use person_protocol::{ChatTextMessage, Person, PersonProtocol};
 use serde::{Deserialize, Serialize};
 use sharded_slab::Slab;
 use utils::option_ext::OptionGet;
@@ -167,6 +167,18 @@ impl Endpoint {
             .await?
             .map(|v| self.connection_pool.insert(v).get())
             .transpose()?)
+    }
+    pub async fn send_chat_text_message(
+        &self,
+        connection: usize,
+        message: ChatTextMessage,
+    ) -> Result<()> {
+        let connection = self.connection_pool.get(connection).get()?.clone();
+        PersonProtocol::send_chat_text_message(&connection, message).await
+    }
+    pub async fn next_chat_text_message(&self, connection: usize) -> Result<ChatTextMessage> {
+        let connection = self.connection_pool.get(connection).get()?.clone();
+        PersonProtocol::next_chat_text_message(&connection).await
     }
     pub async fn subscribe_group(&self, ticket: String) -> Result<usize> {
         let ticket = serde_json::from_slice::<Ticket>(&BASE64_STANDARD.decode(ticket)?)?;

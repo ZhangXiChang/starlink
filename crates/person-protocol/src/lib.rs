@@ -35,6 +35,16 @@ pub struct Person {
     pub bio: String,
 }
 
+#[derive(
+    Archive, rkyv::Serialize, rkyv::Deserialize, Debug, Clone, serde::Serialize, serde::Deserialize,
+)]
+pub struct ChatTextMessage {
+    pub id: String,
+    pub sender_id: String,
+    pub created_at: String,
+    pub content: String,
+}
+
 #[derive(Display)]
 pub enum Event {
     FriendRequest(FriendRequest),
@@ -197,6 +207,22 @@ impl PersonProtocol {
             return Ok(None);
         }
         Ok(Some(connection))
+    }
+    pub async fn send_chat_text_message(
+        connection: &Connection,
+        message: ChatTextMessage,
+    ) -> Result<()> {
+        let mut send = connection.open_uni().await?;
+        send.write_all(&rkyv::to_bytes::<rkyv::rancor::Error>(&message)?)
+            .await?;
+        send.finish()?;
+        Ok(())
+    }
+    pub async fn next_chat_text_message(connection: &Connection) -> Result<ChatTextMessage> {
+        let mut recv = connection.accept_uni().await?;
+        Ok(rkyv::from_bytes::<ChatTextMessage, rkyv::rancor::Error>(
+            &recv.read_to_end(64 * 1024).await?,
+        )?)
     }
 }
 impl ProtocolHandler for PersonProtocol {
