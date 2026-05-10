@@ -1,13 +1,30 @@
-import { createAsync, useParams } from "@solidjs/router";
-import { createVirtualizer } from "@tanstack/solid-virtual";
-import { MessagesSquareIcon, UserIcon, UserPlusIcon } from "lucide-solid";
-import { createSignal, For, lazy, type Setter, Show, Suspense } from "solid-js";
+import { useParams } from "@solidjs/router";
+import {
+	MessagesSquareIcon,
+	RefreshCwIcon,
+	UserIcon,
+	UserPlusIcon,
+} from "lucide-solid";
+import {
+	createResource,
+	createSignal,
+	For,
+	lazy,
+	type Setter,
+	Show,
+} from "solid-js";
 import type { User } from "~/lib/endpoint/types";
-import { QueryBuilder } from "~/lib/query_builder";
-import { MainContext, use_context } from "../context";
+import { list_friends } from "~/lib/friends";
+import { HomeContext, MainContext, use_context } from "../context";
+import ErrorWidget from "../widgets/error";
 import Image from "../widgets/image";
+import Loading from "../widgets/loading";
 
 const LazyAddFriendModal = lazy(() => import("~/components/modal/add_friend"));
+
+function to_error(error: unknown) {
+	return error instanceof Error ? error : new Error(String(error));
+}
 
 export default function FriendList(props: {
 	set_chat_user: Setter<User | undefined>;
@@ -16,22 +33,12 @@ export default function FriendList(props: {
 	const [lazy_add_friend_modal_load, set_lazy_add_friend_modal_load] =
 		createSignal(false);
 	const main_store = use_context(MainContext);
+	const home_store = use_context(HomeContext);
 	const params = useParams<{ user_id: string }>();
-	const friends = createAsync(
-		async () =>
-			await main_store.sqlite.query<User>(
-				QueryBuilder.selectFrom("friend")
-					.select(["id", "name", "avatar", "bio"])
-					.where("owner_id", "=", params.user_id)
-					.compile(),
-			),
+	const [friends] = createResource(
+		() => [params.user_id, home_store.friend_list_revision()] as const,
+		async ([owner_id]) => await list_friends(main_store.sqlite, owner_id),
 	);
-	let friend_list_ref: HTMLDivElement | undefined;
-	const friend_list_virtualizer = createVirtualizer({
-		getScrollElement: () => friend_list_ref ?? null,
-		count: friends()?.length ?? 0,
-		estimateSize: () => 80,
-	});
 	return (
 		<>
 			<dialog ref={add_friend_dialog_ref} class="modal" closedby="any">
@@ -49,7 +56,15 @@ export default function FriendList(props: {
 						好友
 					</span>
 				</div>
-				<div class="flex-1 flex justify-end">
+				<div class="flex-1 flex justify-end gap-1">
+					<div class="tooltip" data-tip="刷新好友列表">
+						<button
+							class="btn btn-square btn-sm bg-base-100"
+							onClick={() => home_store.refresh_friend_list()}
+						>
+							<RefreshCwIcon class="size-4" />
+						</button>
+					</div>
 					<div class="tooltip" data-tip="添加好友">
 						<button
 							class="btn btn-square btn-sm bg-base-100"
@@ -63,61 +78,57 @@ export default function FriendList(props: {
 					</div>
 				</div>
 			</div>
-			<Suspense>
-				<div ref={friend_list_ref} class="flex-1 overflow-y-auto">
-					<div
-						class="relative w-full"
-						style={{ height: `${friend_list_virtualizer.getTotalSize()}px` }}
+			<Show when={!friends.loading} fallback={<Loading />}>
+				<Show
+					when={friends.error === undefined}
+					fallback={<ErrorWidget error={to_error(friends.error)} />}
+				>
+					<Show
+						when={(friends()?.length ?? 0) > 0}
+						fallback={
+							<div class="flex-1 flex items-center justify-center">
+								<span class="text-sm text-base-content/60">暂无好友</span>
+							</div>
+						}
 					>
-						<ul
-							class="list absolute w-full"
-							style={{
-								transform: `translateY(${friend_list_virtualizer.getVirtualItems().at(0)?.start ?? 0}px)`,
-							}}
-						>
-							<For each={friend_list_virtualizer.getVirtualItems()}>
-								{(v) => (
-									<li
-										ref={(v) =>
-											queueMicrotask(() =>
-												friend_list_virtualizer.measureElement(v),
-											)
-										}
-										data-index={v.index}
-										class="list-row"
-									>
-										<div class="avatar">
-											<Show
-												keyed
-												when={friends()?.at(v.index)?.avatar}
-												fallback={
-													<UserIcon class="size-10 rounded-full bg-base-300" />
-												}
+						<div class="flex-1 overflow-y-auto">
+							<ul class="list w-full">
+								<For each={friends()}>
+									{(friend) => (
+										<li class="list-row">
+											<div class="avatar">
+												<Show
+													keyed
+													when={friend.avatar}
+													fallback={
+														<UserIcon class="size-10 rounded-full bg-base-300" />
+													}
+												>
+													{(v) => (
+														<Image class="size-10 rounded-box" image={v} />
+													)}
+												</Show>
+											</div>
+											<div class="flex min-w-0 flex-col">
+												<span class="truncate">{friend.name}</span>
+												<span class="truncate text-xs text-base-content/60">
+													{friend.bio}
+												</span>
+											</div>
+											<button
+												class="btn btn-square btn-ghost"
+												onClick={() => props.set_chat_user(friend)}
 											>
-												{(v) => <Image class="size-10 rounded-box" image={v} />}
-											</Show>
-										</div>
-										<div class="flex flex-col">
-											<span>{friends()?.at(v.index)?.name}</span>
-											<span class="text-xs text-base-content/60">
-												{friends()?.at(v.index)?.bio}
-											</span>
-										</div>
-										<button
-											class="btn btn-square btn-ghost"
-											onClick={() =>
-												props.set_chat_user(friends()?.at(v.index))
-											}
-										>
-											<MessagesSquareIcon />
-										</button>
-									</li>
-								)}
-							</For>
-						</ul>
-					</div>
-				</div>
-			</Suspense>
+												<MessagesSquareIcon />
+											</button>
+										</li>
+									)}
+								</For>
+							</ul>
+						</div>
+					</Show>
+				</Show>
+			</Show>
 		</>
 	);
 }

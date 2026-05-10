@@ -126,25 +126,31 @@ impl Endpoint {
         Ok(event_type)
     }
     pub fn person_protocol_event(&self, method: String) -> Result<serde_json::Value> {
-        match self.person_protocol_event.lock().take().get()? {
-            person_protocol::Event::FriendRequest(friend_request) => match method.as_ref() {
-                "remote_id" => return Ok(friend_request.remote_id().to_string().into()),
-                "accept" => friend_request.accept()?,
-                "reject" => friend_request.reject()?,
-                _ => (),
+        let mut event = self.person_protocol_event.lock();
+        match method.as_ref() {
+            "remote_id" => match event.as_ref().get()? {
+                person_protocol::Event::FriendRequest(friend_request) => {
+                    return Ok(friend_request.remote_id().to_string().into());
+                }
+                person_protocol::Event::ChatRequest(chat_request) => {
+                    return Ok(chat_request.remote_id().to_string().into());
+                }
             },
-            person_protocol::Event::ChatRequest(chat_request) => match method.as_ref() {
-                "remote_id" => return Ok(chat_request.remote_id().to_string().into()),
-                "accept" => {
+            "accept" => match event.take().get()? {
+                person_protocol::Event::FriendRequest(friend_request) => friend_request.accept()?,
+                person_protocol::Event::ChatRequest(chat_request) => {
                     return Ok(self
                         .connection_pool
                         .insert(chat_request.accept()?)
                         .get()?
                         .into());
                 }
-                "reject" => chat_request.reject()?,
-                _ => (),
             },
+            "reject" => match event.take().get()? {
+                person_protocol::Event::FriendRequest(friend_request) => friend_request.reject()?,
+                person_protocol::Event::ChatRequest(chat_request) => chat_request.reject()?,
+            },
+            _ => (),
         }
         Ok(().into())
     }
