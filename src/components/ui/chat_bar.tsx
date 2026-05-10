@@ -17,9 +17,21 @@ export default function ChatBar(props: { chat_user: User }) {
 		if (!u) throw new Error("用户不存在");
 		return await main_store.sqlite.query<Message>(
 			QueryBuilder.selectFrom("chat_message")
-				.select(["chat_user_id", "timestamp", "content"])
+				.select([
+					"id",
+					"owner_id",
+					"chat_user_id",
+					"sender_id",
+					"content",
+					"status",
+					"created_at",
+					"updated_at",
+					"retry_count",
+					"last_error",
+				])
 				.where("owner_id", "=", u.id)
 				.where("chat_user_id", "=", props.chat_user.id)
+				.orderBy("created_at", "asc")
 				.compile(),
 		);
 	});

@@ -13,8 +13,30 @@ export type RelayConfig = {
 	quic_port: number;
 };
 
+export type MessageStatus = "sending" | "sent" | "failed" | "received";
+
 export type Message = {
+	id: string;
+	owner_id: string;
+	chat_user_id: string;
 	sender_id: string;
-	timestamp: number;
 	content: string;
+	status: MessageStatus;
+	created_at: string;
+	updated_at: string;
+	retry_count: number;
+	last_error?: string | null;
+};
+
+export type FriendRequestStatus = "pending" | "accepted" | "rejected";
+
+export type FriendRequest = {
+	owner_id: string;
+	remote_id: string;
+	name: string;
+	avatar?: Uint8Array;
+	bio: string;
+	status: FriendRequestStatus;
+	created_at: string;
+	responded_at?: string | null;
 };

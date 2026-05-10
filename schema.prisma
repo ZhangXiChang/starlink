@@ -18,16 +18,41 @@ model user {
 }
 
 model friend {
-  id       String @id
   owner_id String
+  id       String
   name     String
   avatar   Bytes?
   bio      String
+
+  @@id([owner_id, id])
 }
 
 model chat_message {
-  timestamp    DateTime @id @default(now())
+  id           String @id
   owner_id     String
   chat_user_id String
+  sender_id    String
   content      String
+  status       String   @default("sent")
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+  retry_count  Int      @default(0)
+  last_error   String?
+
+  @@index([owner_id, chat_user_id, created_at])
+  @@index([owner_id, status])
+}
+
+model friend_request {
+  owner_id     String
+  remote_id    String
+  name         String
+  avatar       Bytes?
+  bio          String
+  status       String   @default("pending")
+  created_at   DateTime @default(now())
+  responded_at DateTime?
+
+  @@id([owner_id, remote_id])
+  @@index([owner_id, status, created_at])
 }
