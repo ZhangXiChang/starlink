@@ -8,6 +8,20 @@ import { QueryBuilder } from "~/lib/query_builder";
 import { MainContext, ShellContext, use_context } from "../context";
 import Image from "../widgets/image";
 
+const messageStatusText = (message: Message | undefined) => {
+	if (message?.status === "sending") return "发送中";
+	if (message?.status === "failed") return message.error_message ?? "发送失败";
+	return "已发送";
+};
+
+const messageTimeText = (message: Message | undefined) => {
+	if (!message) return "";
+	return new Date(message.created_at).toLocaleTimeString([], {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+};
+
 export default function ChatBar(props: { chat_user: User }) {
 	const shell_store = use_context(ShellContext);
 	const main_store = use_context(MainContext);
@@ -17,9 +31,21 @@ export default function ChatBar(props: { chat_user: User }) {
 		if (!u) throw new Error("用户不存在");
 		return await main_store.sqlite.query<Message>(
 			QueryBuilder.selectFrom("chat_message")
-				.select(["chat_user_id", "timestamp", "content"])
+				.select([
+					"id",
+					"owner_id",
+					"chat_user_id",
+					"sender_id",
+					"content",
+					"status",
+					"created_at",
+					"sort_at",
+					"retry_count",
+					"error_message",
+				])
 				.where("owner_id", "=", u.id)
 				.where("chat_user_id", "=", props.chat_user.id)
+				.orderBy("sort_at", "asc")
 				.compile(),
 		);
 	});
@@ -70,56 +96,61 @@ export default function ChatBar(props: { chat_user: User }) {
 							}}
 						>
 							<For each={message_list_virtualizer.getVirtualItems()}>
-								{(v) => (
-									<div
-										class={twMerge(
-											"chat p-0",
-											messages()?.at(v.index)?.sender_id === props.chat_user.id
-												? "chat-start"
-												: "chat-end",
-										)}
-									>
-										<div class="chat-image avatar">
-											<Show
-												keyed
-												when={
-													messages()?.at(v.index)?.sender_id ===
-													props.chat_user.id
-														? props.chat_user.avatar
-														: user()?.avatar
-												}
-												fallback={
-													<UserIcon class="size-10 rounded-full bg-base-300" />
-												}
-											>
-												{(avatar) => (
-													<Image class="size-10 rounded-full" image={avatar} />
-												)}
-											</Show>
-										</div>
-										<div class="chat-header items-center">
-											<span
-												class={twMerge(
-													"text-sm text-base-content font-bold",
-													messages()?.at(v.index)?.sender_id ===
-														props.chat_user.id
-														? undefined
-														: "order-1",
-												)}
-											>
-												{messages()?.at(v.index)?.sender_id ===
-												props.chat_user.id
-													? props.chat_user.name
-													: user()?.name}
+								{(v) => {
+									const message = () => messages()?.at(v.index);
+									const is_remote_message = () =>
+										message()?.sender_id === props.chat_user.id;
+									return (
+										<div
+											class={twMerge(
+												"chat p-0",
+												is_remote_message() ? "chat-start" : "chat-end",
+											)}
+										>
+											<div class="chat-image avatar">
+												<Show
+													keyed
+													when={
+														is_remote_message()
+															? props.chat_user.avatar
+															: user()?.avatar
+													}
+													fallback={
+														<UserIcon class="size-10 rounded-full bg-base-300" />
+													}
+												>
+													{(avatar) => (
+														<Image
+															class="size-10 rounded-full"
+															image={avatar}
+														/>
+													)}
+												</Show>
+											</div>
+											<div class="chat-header items-center">
+												<span
+													class={twMerge(
+														"text-sm text-base-content font-bold",
+														is_remote_message() ? undefined : "order-1",
+													)}
+												>
+													{is_remote_message()
+														? props.chat_user.name
+														: user()?.name}
+												</span>
+												<time class="text-base-content/60">
+													{messageTimeText(message())}
+												</time>
+											</div>
+											<span class="border rounded-box bg-base-100 border-neutral-200 p-2">
+												{message()?.content}
 											</span>
-											<time class="text-base-content/60">12:45</time>
+											<div class="chat-footer text-base-content/60">
+												{messageStatusText(message())}
+											</div>
 										</div>
-										<span class="border rounded-box bg-base-100 border-neutral-200 p-2">
-											{messages()?.at(v.index)?.content}
-										</span>
-										<div class="chat-footer text-base-content/60">已读</div>
-									</div>
-								)}
+									);
+								}}
 							</For>
 						</div>
 					</div>

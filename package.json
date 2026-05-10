@@ -15,6 +15,7 @@
 		"test": "playwright test",
 		"format": "biome check --write",
 		"check": "run-p 'check:*'",
+		"check:schema-contract": "bun test ./scripts/schema_contract.test.ts",
 		"check:tsc": "tsc",
 		"check:eslint": "eslint src",
 		"check:script": "uv run basedpyright scripts",
