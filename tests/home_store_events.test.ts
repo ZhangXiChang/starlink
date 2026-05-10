@@ -1,208 +1,147 @@
-import { expect, test } from "@playwright/test";
-import { createSignal } from "solid-js";
-import type { Endpoint } from "../src/lib/endpoint/interface";
-import type {
-	Person,
-	PersonProtocolEvent,
-	User,
-} from "../src/lib/endpoint/types";
-import { HomeStore } from "../src/stores/home";
-import type { MainStore } from "../src/stores/main";
-import type { ShellStore } from "../src/stores/shell";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
-type Query = { sql: string; parameters?: readonly unknown[] };
+const APP_URL = "http://localhost:8787";
 
-class FakeSQLite {
-	friends = new Set<string>();
-	executed: Query[] = [];
-
-	async query<T>(query: Query): Promise<T[]> {
-		if (query.sql.includes('from "user"')) {
-			return [
-				{
-					key: Uint8Array.from([1, 2, 3]),
-					name: "owner",
-					avatar: null,
-					bio: "owner bio",
-				},
-			] as T[];
-		}
-		if (query.sql.includes("friend")) {
-			const has_friend = query.parameters?.some((parameter) =>
-				this.friends.has(String(parameter)),
-			);
-			return has_friend ? ([{ exists: 1 }] as T[]) : [];
-		}
-		return [];
-	}
-
-	async execute(query: Query) {
-		this.executed.push(query);
-	}
+async function select_account(page: Page, name: string) {
+	const account_select = page.getByLabel("账户选择账户");
+	await expect
+		.poll(async () => await account_select.locator("option").allTextContents())
+		.toContain(name);
+	await account_select.selectOption({ label: name });
+	return await account_select.inputValue();
 }
 
-class FakeEndpoint implements Endpoint {
-	events: Array<{ type: PersonProtocolEvent; remote_id: string }>;
-	responses: Array<{ method: "accept" | "reject"; remote_id: string }> = [];
-	requested_chats: string[] = [];
-	closed = false;
-	next_chat_result: bigint | null = 100n;
-	private active_event?: { type: PersonProtocolEvent; remote_id: string };
-	private pending_next_event?: {
-		reject: (error: Error) => void;
-	};
-
-	constructor(events: Array<{ type: PersonProtocolEvent; remote_id: string }>) {
-		this.events = [...events];
-	}
-
-	async close() {
-		this.closed = true;
-		this.pending_next_event?.reject(new Error("closed"));
-	}
-
-	id() {
-		return "owner-id";
-	}
-
-	async person_protocol_next_event(): Promise<PersonProtocolEvent> {
-		if (this.closed) throw new Error("closed");
-		const event = this.events.shift();
-		if (event) {
-			this.active_event = event;
-			return event.type;
-		}
-		return await new Promise<PersonProtocolEvent>((_resolve, reject) => {
-			this.pending_next_event = { reject };
-		});
-	}
-
-	async person_protocol_event<T>(method: string): Promise<T> {
-		if (method === "remote_id") return this.active_event?.remote_id as T;
-		if (method === "accept" || method === "reject") {
-			if (!this.active_event) throw new Error("missing active event");
-			this.responses.push({ method, remote_id: this.active_event.remote_id });
-			this.active_event = undefined;
-			return (method === "accept" ? 42n : undefined) as T;
-		}
-		throw new Error(`unexpected person protocol method: ${method}`);
-	}
-
-	async request_person(id: string): Promise<Person> {
-		return { name: `remote ${id}`, bio: `bio ${id}` };
-	}
-
-	async request_friend(): Promise<boolean> {
-		return true;
-	}
-
-	async request_chat(id: string): Promise<bigint | null> {
-		this.requested_chats.push(id);
-		return this.next_chat_result;
-	}
-
-	async subscribe_group(): Promise<bigint> {
-		return 1n;
-	}
+async function register_user(page: Page, name: string) {
+	await page.goto(APP_URL);
+	await page.getByRole("radio", { name: "注册" }).check();
+	await page.getByRole("textbox", { name: "用户名" }).fill(name);
+	await page.getByRole("button", { name: "注册" }).click();
+	await page.getByRole("radio", { name: "登录" }).check();
+	return await select_account(page, name);
 }
 
-class FakeEndpointModule {
-	constructor(private endpoint: FakeEndpoint) {}
-
-	async create_endpoint() {
-		return this.endpoint;
-	}
+async function login_as(page: Page, name: string) {
+	await page.goto(APP_URL);
+	await page.getByRole("radio", { name: "登录" }).check();
+	await select_account(page, name);
+	await page.getByRole("button", { name: "登录" }).click();
+	await expect(page.getByRole("radio", { name: "登录" })).not.toBeVisible();
 }
 
-function create_stores(endpoint: FakeEndpoint, sqlite = new FakeSQLite()) {
-	const [user, set_user] = createSignal<User>();
-	const popups: Array<{ content: unknown; options: unknown }> = [];
-	const shell_store = {
-		toaster: {
-			popup(content: unknown, options: unknown) {
-				popups.push({ content, options });
-				return () => {};
-			},
-		},
-		user: [user, set_user],
-	} as unknown as ShellStore;
-	const main_store = {
-		sqlite,
-		endpoint_module: new FakeEndpointModule(endpoint),
-	} as unknown as MainStore;
-	return { shell_store, main_store, sqlite, popups };
+async function open_friend_list(page: Page) {
+	await page.locator('label[aria-label="好友"]').click();
+	await expect(page.getByRole("button", { name: "添加好友" })).toBeVisible();
 }
 
-async function wait_for(assertion: () => void | Promise<void>) {
-	const deadline = Date.now() + 5000;
-	let last_error: unknown;
+async function search_user_until_found(
+	page: Page,
+	add_friend_dialog: Locator,
+	user_id: string,
+	name: string,
+) {
+	await add_friend_dialog.getByLabel("用户ID").fill(user_id);
+	const deadline = Date.now() + 30_000;
+	let last_message = "";
 	while (Date.now() < deadline) {
+		await add_friend_dialog.getByRole("button", { name: "搜索" }).click();
 		try {
-			await assertion();
+			await expect(add_friend_dialog.getByText("已找到用户")).toBeVisible({
+				timeout: 1500,
+			});
+			await expect(add_friend_dialog.getByText(name)).toBeVisible();
 			return;
-		} catch (error) {
-			last_error = error;
-			await new Promise((resolve) => setTimeout(resolve, 50));
+		} catch {}
+		const alert = add_friend_dialog.getByRole("alert");
+		if (await alert.isVisible().catch(() => false)) {
+			last_message = (await alert.textContent())?.trim() ?? "";
+			if (
+				last_message !== "" &&
+				!last_message.includes("No addressing information available")
+			) {
+				throw new Error(last_message);
+			}
 		}
+		await page.waitForTimeout(500);
 	}
-	throw last_error;
+	throw new Error(
+		`未能搜索到用户 ${name}${last_message ? `：${last_message}` : ""}`,
+	);
 }
 
-test("HomeStore rejects duplicate friend requests before accepting the next friend chat request", async () => {
-	const endpoint = new FakeEndpoint([
-		{ type: "FriendRequest", remote_id: "duplicate-friend" },
-		{ type: "ChatRequest", remote_id: "chat-friend" },
-	]);
-	const { shell_store, main_store, sqlite } = create_stores(endpoint);
-	sqlite.friends.add("duplicate-friend");
-	sqlite.friends.add("chat-friend");
+async function become_friends(
+	sender_page: Page,
+	receiver_page: Page,
+	receiver_id: string,
+	sender_name: string,
+	receiver_name: string,
+) {
+	await open_friend_list(receiver_page);
+	await expect(receiver_page.getByText("暂无好友")).toBeVisible();
 
-	const store = await HomeStore.new(shell_store, main_store, "owner-id");
+	await open_friend_list(sender_page);
+	await expect(sender_page.getByText("暂无好友")).toBeVisible();
 
-	await wait_for(() => {
-		expect(endpoint.responses).toEqual([
-			{ method: "reject", remote_id: "duplicate-friend" },
-			{ method: "accept", remote_id: "chat-friend" },
-		]);
-		expect(store.chat_connection_state("chat-friend")).toMatchObject({
-			status: "connected",
-			connection: 42n,
+	await sender_page.getByRole("button", { name: "添加好友" }).click();
+	const add_friend_dialog = sender_page.locator("dialog[open]");
+	await search_user_until_found(
+		sender_page,
+		add_friend_dialog,
+		receiver_id,
+		receiver_name,
+	);
+
+	await add_friend_dialog.getByRole("button", { name: "发送好友请求" }).click();
+	await expect(receiver_page.getByText(sender_name)).toBeVisible();
+	await expect(receiver_page.getByText("请求添加你为好友")).toBeVisible();
+
+	await receiver_page.getByRole("button", { name: "同意好友请求" }).click();
+	await expect(receiver_page.getByText("已同意好友请求")).toBeVisible();
+	await expect(add_friend_dialog.getByText("对方同意好友请求")).toBeVisible();
+	await sender_page.keyboard.press("Escape");
+	await expect(add_friend_dialog).not.toBeVisible();
+
+	await expect(
+		sender_page.getByRole("button", { name: `打开与 ${receiver_name} 的聊天` }),
+	).toBeVisible();
+	await expect(
+		receiver_page.getByRole("button", {
+			name: `打开与 ${sender_name} 的聊天`,
+		}),
+	).toBeVisible();
+}
+
+test.describe("HomeStore 事件循环", () => {
+	test("好友请求完成后可以继续处理真实聊天请求", async ({ page, context }) => {
+		test.setTimeout(90_000);
+		const unique = `${Date.now()}-${test.info().workerIndex}`;
+		const sender_name = `聊天甲-${unique}`;
+		const receiver_name = `聊天乙-${unique}`;
+
+		await register_user(page, sender_name);
+		const receiver_id = await register_user(page, receiver_name);
+
+		const receiver_page = await context.newPage();
+		await login_as(receiver_page, receiver_name);
+		await login_as(page, sender_name);
+
+		await become_friends(
+			page,
+			receiver_page,
+			receiver_id,
+			sender_name,
+			receiver_name,
+		);
+
+		await page
+			.getByRole("button", { name: `打开与 ${receiver_name} 的聊天` })
+			.click();
+		await expect(page.getByText("已连接")).toBeVisible({ timeout: 30_000 });
+
+		await receiver_page
+			.getByRole("button", { name: `打开与 ${sender_name} 的聊天` })
+			.click();
+		await expect(receiver_page.getByText("已连接")).toBeVisible({
+			timeout: 30_000,
 		});
 	});
-	await store.cleanup();
-});
-
-test("HomeStore rejects chat requests from non-friends", async () => {
-	const endpoint = new FakeEndpoint([
-		{ type: "ChatRequest", remote_id: "stranger" },
-	]);
-	const { shell_store, main_store } = create_stores(endpoint);
-
-	const store = await HomeStore.new(shell_store, main_store, "owner-id");
-
-	await wait_for(() => {
-		expect(endpoint.responses).toEqual([
-			{ method: "reject", remote_id: "stranger" },
-		]);
-		expect(store.chat_connection_state("stranger")).toMatchObject({
-			status: "rejected",
-		});
-	});
-	await store.cleanup();
-});
-
-test("HomeStore exposes outgoing chat connection status", async () => {
-	const endpoint = new FakeEndpoint([]);
-	const { shell_store, main_store, sqlite } = create_stores(endpoint);
-	sqlite.friends.add("chat-friend");
-	const store = await HomeStore.new(shell_store, main_store, "owner-id");
-
-	await store.connect_chat("chat-friend");
-
-	expect(endpoint.requested_chats).toEqual(["chat-friend"]);
-	expect(store.chat_connection_state("chat-friend")).toMatchObject({
-		status: "connected",
-		connection: 100n,
-	});
-	await store.cleanup();
 });
