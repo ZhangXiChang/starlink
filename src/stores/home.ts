@@ -78,7 +78,9 @@ export class HomeStore {
 				)();
 				if (this.closed) return;
 				if (event_error) {
-					shell_store.toaster.popup(`好友请求监听失败：${event_error.message}`);
+					shell_store.toaster.popup(`好友请求监听失败：${event_error.message}`, {
+						type: "error",
+					});
 					return;
 				}
 				if (event_type === "FriendRequest") {
@@ -89,6 +91,7 @@ export class HomeStore {
 						await tryit(() => this.endpoint.person_protocol_event("reject"))();
 						shell_store.toaster.popup(
 							`处理好友请求失败：${handle_error.message}`,
+							{ type: "error" },
 						);
 					}
 				}
@@ -112,7 +115,7 @@ export class HomeStore {
 				status: "rejected",
 			});
 			await this.endpoint.person_protocol_event("reject");
-			shell_store.toaster.popup("已拒绝重复好友请求");
+			shell_store.toaster.popup("已拒绝重复好友请求", { type: "info" });
 			return;
 		}
 		await save_friend_request(main_store.sqlite, {
@@ -133,7 +136,7 @@ export class HomeStore {
 					this.endpoint.person_protocol_event(accepted ? "accept" : "reject"),
 				)();
 				if (response_error) {
-					shell_store.toaster.popup(response_error.message);
+					shell_store.toaster.popup(response_error.message, { type: "error" });
 					resolve();
 					return;
 				}
@@ -146,9 +149,9 @@ export class HomeStore {
 				if (accepted) {
 					await add_friend(main_store.sqlite, owner_id, remote);
 					this.refresh_friend_list();
-					shell_store.toaster.popup("已同意好友请求");
+					shell_store.toaster.popup("已同意好友请求", { type: "success" });
 				} else {
-					shell_store.toaster.popup("已拒绝好友请求");
+					shell_store.toaster.popup("已拒绝好友请求", { type: "info" });
 				}
 				resolve();
 			};
@@ -158,6 +161,7 @@ export class HomeStore {
 					on_accept: () => void respond(true),
 					on_reject: () => void respond(false),
 				}),
+				{ duration: null, type: "info" },
 			);
 		});
 	}

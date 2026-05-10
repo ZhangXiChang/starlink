@@ -21,14 +21,25 @@ type AddFriendStatus = {
 	message: string;
 };
 
-function status_class(status: AddFriendStatus) {
-	switch (status.type) {
+function status_panel_class(type: AddFriendStatus["type"]) {
+	switch (type) {
 		case "success":
-			return "alert-success";
+			return "border-success/40 bg-success/10";
 		case "error":
-			return "alert-error";
+			return "border-error/40 bg-error/10";
 		case "info":
-			return "alert-info";
+			return "border-info/40 bg-info/10";
+	}
+}
+
+function status_dot_class(type: AddFriendStatus["type"]) {
+	switch (type) {
+		case "success":
+			return "bg-success";
+		case "error":
+			return "bg-error";
+		case "info":
+			return "bg-info";
 	}
 }
 
@@ -44,7 +55,7 @@ export default function AddFriend() {
 	const [sending, set_sending] = createSignal(false);
 	const set_message = (type: AddFriendStatus["type"], message: string) => {
 		set_status({ type, message });
-		shell_store.toaster.popup(message);
+		shell_store.toaster.popup(message, { type });
 	};
 	const on_search_user = async () => {
 		if (searching()) return;
@@ -124,8 +135,7 @@ export default function AddFriend() {
 			if (agree) {
 				await add_friend(main_store.sqlite, owner.id, friend);
 				home_store.refresh_friend_list();
-				set_status({ type: "success", message: "对方同意好友请求" });
-				shell_store.toaster.popup("对方同意好友请求");
+				set_message("success", "对方同意好友请求");
 			} else {
 				set_message("info", "对方拒绝好友请求");
 			}
@@ -135,74 +145,90 @@ export default function AddFriend() {
 	};
 	return (
 		<Modal title="添加好友" description="两地俱秋夕，相望共星河。">
-			<div class="flex flex-col items-start gap-1">
-				<span class="font-bold">搜索用户</span>
-				<div class="join w-full">
-					<input
-						ref={search_user_id_input_ref}
-						aria-label="用户ID"
-						class="join-item input flex-1"
-						placeholder="用户ID"
-						disabled={searching()}
-						onKeyDown={async (e) => {
-							if (e.key === "Enter") {
-								await on_search_user();
-							}
-						}}
-					/>
-					<button
-						class="join-item btn"
-						disabled={searching()}
-						onClick={on_search_user}
-					>
-						<Show when={searching()} fallback={<SearchIcon class="size-4" />}>
-							<span class="loading loading-spinner loading-xs" />
-						</Show>
-						搜索
-					</button>
-				</div>
-			</div>
-			<Show when={status()}>
-				{(v) => (
-					<div class={`alert py-2 ${status_class(v())}`}>
-						<span class="text-sm">{v().message}</span>
-					</div>
-				)}
-			</Show>
-			<Show when={search_user_result()}>
-				{(v) => (
-					<div class="flex p-2 gap-3 items-center">
-						<div class="avatar">
-							<Show
-								keyed
-								when={v().avatar}
-								fallback={<UserIcon class="size-12 rounded-full bg-base-300" />}
-							>
-								{(v) => <Image class="size-12 rounded-full" image={v} />}
+			<div class="flex flex-col gap-3">
+				<div class="flex flex-col items-start gap-2">
+					<span class="font-bold">搜索用户</span>
+					<div class="join w-full">
+						<input
+							ref={search_user_id_input_ref}
+							aria-label="用户ID"
+							class="join-item input flex-1"
+							placeholder="用户ID"
+							disabled={searching()}
+							onKeyDown={async (e) => {
+								if (e.key === "Enter") {
+									await on_search_user();
+								}
+							}}
+						/>
+						<button
+							class="join-item btn"
+							disabled={searching()}
+							onClick={on_search_user}
+						>
+							<Show when={searching()} fallback={<SearchIcon class="size-4" />}>
+								<span class="loading loading-spinner loading-xs" />
 							</Show>
-						</div>
-						<div class="flex min-w-0 flex-col">
-							<span class="font-bold">{v().name}</span>
-							<span class="truncate text-sm text-base-content/60">
-								{v().bio}
+							搜索
+						</button>
+					</div>
+				</div>
+				<Show when={status()}>
+					{(v) => (
+						<div
+							class={`flex items-start gap-2 rounded-box border px-3 py-2 text-base-content shadow-sm ${status_panel_class(v().type)}`}
+							role={v().type === "error" ? "alert" : "status"}
+						>
+							<span
+								class={`mt-1.5 size-2 shrink-0 rounded-full ${status_dot_class(v().type)}`}
+							/>
+							<span class="min-w-0 flex-1 text-sm leading-5">
+								{v().message}
 							</span>
 						</div>
-						<div class="flex-1 flex justify-end">
-							<div class="tooltip tooltip-left" data-tip="发送好友请求">
-								<button
-									disabled={sending()}
-									class="btn btn-square btn-sm"
-									onClick={() => void on_send_friend_request(v())}
+					)}
+				</Show>
+				<Show when={search_user_result()}>
+					{(v) => (
+						<div class="flex items-center gap-3 rounded-box border border-base-300 bg-base-100 p-3">
+							<div class="avatar">
+								<Show
+									keyed
+									when={v().avatar}
+									fallback={
+										<UserIcon class="size-12 rounded-full bg-base-300" />
+									}
 								>
-									<Show when={sending()} fallback={<SendIcon class="size-4" />}>
-										<span class="loading loading-spinner loading-xs" />
-									</Show>
-								</button>
+									{(v) => <Image class="size-12 rounded-full" image={v} />}
+								</Show>
+							</div>
+							<div class="flex min-w-0 flex-col">
+								<span class="font-bold">{v().name}</span>
+								<span class="truncate text-sm text-base-content/60">
+									{v().bio}
+								</span>
+							</div>
+							<div class="flex flex-1 justify-end">
+								<div class="tooltip tooltip-left" data-tip="发送好友请求">
+									<button
+										aria-label="发送好友请求"
+										disabled={sending()}
+										class="btn btn-square btn-sm"
+										onClick={() => void on_send_friend_request(v())}
+									>
+										<Show
+											when={sending()}
+											fallback={<SendIcon class="size-4" />}
+										>
+											<span class="loading loading-spinner loading-xs" />
+										</Show>
+									</button>
+								</div>
 							</div>
 						</div>
-					</div>
-				)}
-			</Show>
+					)}
+				</Show>
+			</div>
 		</Modal>
 	);
 }

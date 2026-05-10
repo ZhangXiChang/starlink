@@ -59,6 +59,7 @@ export default function FriendList(props: {
 				<div class="flex-1 flex justify-end gap-1">
 					<div class="tooltip" data-tip="刷新好友列表">
 						<button
+							aria-label="刷新好友列表"
 							class="btn btn-square btn-sm bg-base-100"
 							onClick={() => home_store.refresh_friend_list()}
 						>
@@ -67,6 +68,7 @@ export default function FriendList(props: {
 					</div>
 					<div class="tooltip" data-tip="添加好友">
 						<button
+							aria-label="添加好友"
 							class="btn btn-square btn-sm bg-base-100"
 							onClick={() => {
 								add_friend_dialog_ref?.showModal();
@@ -116,6 +118,7 @@ export default function FriendList(props: {
 												</span>
 											</div>
 											<button
+												aria-label={`打开与 ${friend.name} 的聊天`}
 												class="btn btn-square btn-ghost"
 												onClick={() => props.set_chat_user(friend)}
 											>

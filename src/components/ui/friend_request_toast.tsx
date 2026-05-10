@@ -9,7 +9,7 @@ export function create_friend_request_toast(props: {
 	on_reject: () => void;
 }) {
 	return (
-		<div class="flex items-center gap-3">
+		<div class="flex w-72 max-w-[calc(100dvw-3rem)] items-center gap-3">
 			<div class="avatar">
 				<Show
 					keyed
@@ -27,12 +27,14 @@ export function create_friend_request_toast(props: {
 			</div>
 			<div class="flex gap-1">
 				<button
+					aria-label="同意好友请求"
 					class="btn btn-success btn-xs btn-square"
 					onClick={props.on_accept}
 				>
 					<CheckIcon class="size-4" />
 				</button>
 				<button
+					aria-label="拒绝好友请求"
 					class="btn btn-error btn-xs btn-square"
 					onClick={props.on_reject}
 				>

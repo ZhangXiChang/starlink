@@ -8,7 +8,10 @@ export default function SidebarButtonGroup(props: {
 }) {
 	return (
 		<div class="join join-vertical px-2">
-			<label class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content">
+			<label
+				aria-label="消息"
+				class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content"
+			>
 				<input
 					type="radio"
 					class="hidden"
@@ -26,7 +29,10 @@ export default function SidebarButtonGroup(props: {
 				/>
 				<MessageCircleMoreIcon />
 			</label>
-			<label class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content">
+			<label
+				aria-label="好友"
+				class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content"
+			>
 				<input
 					type="radio"
 					class="hidden"
@@ -44,7 +50,10 @@ export default function SidebarButtonGroup(props: {
 				/>
 				<UserIcon />
 			</label>
-			<label class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content">
+			<label
+				aria-label="群组"
+				class="join-item btn btn-square bg-base-100 has-checked:bg-neutral has-checked:text-neutral-content"
+			>
 				<input
 					type="radio"
 					class="hidden"

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 import type { CompiledQuery } from "kysely";
 import type { User } from "../src/lib/endpoint/types";
 import {
@@ -7,6 +7,7 @@ import {
 	validate_friend_search,
 } from "../src/lib/friends";
 import type { SQLite } from "../src/lib/sqlite/interface";
+import { Toaster } from "../src/lib/toaster";
 
 function create_sqlite_stub(query_result: unknown[] = []) {
 	const executed: CompiledQuery[] = [];
@@ -28,7 +29,53 @@ function create_sqlite_stub(query_result: unknown[] = []) {
 	return { sqlite, executed, queried };
 }
 
-test.describe("friend helpers", () => {
+async function register_and_login(page: Page, name: string) {
+	await page.goto("http://localhost:8787");
+	await page.getByRole("radio", { name: "注册" }).check();
+	await page.getByRole("textbox", { name: "用户名" }).fill(name);
+	await page.getByRole("button", { name: "注册" }).click();
+	await page.getByRole("radio", { name: "登录" }).check();
+	const account_select = page.getByLabel("账户选择账户");
+	await account_select.selectOption({ index: 1 });
+	const owner_id = await account_select.inputValue();
+	await page.getByRole("button", { name: "登录" }).click();
+	await expect(page.getByRole("radio", { name: "登录" })).not.toBeVisible();
+	return owner_id;
+}
+
+test.describe("好友功能", () => {
+	test("添加好友表单会校验空用户和当前用户", async ({ page }) => {
+		const owner_id = await register_and_login(
+			page,
+			`好友测试-${Date.now()}`,
+		);
+
+		await page.locator('label[aria-label="好友"]').click();
+		await page.getByRole("button", { name: "添加好友" }).click();
+		const add_friend_dialog = page.locator("dialog");
+
+		await add_friend_dialog.getByRole("button", { name: "搜索" }).click();
+		await expect(add_friend_dialog.getByText("请输入用户ID")).toBeVisible();
+
+		await add_friend_dialog.getByLabel("用户ID").fill(owner_id);
+		await add_friend_dialog.getByRole("button", { name: "搜索" }).click();
+		await expect(add_friend_dialog.getByText("不能添加自己为好友")).toBeVisible();
+	});
+
+	test("普通 toast 会自动关闭，操作 toast 保持到手动关闭", async () => {
+		const toaster = new Toaster();
+
+		toaster.popup("你们已经是好友", { type: "info", duration: 20 });
+		expect(toaster.toasts().size).toBe(1);
+		await expect.poll(() => toaster.toasts().size).toBe(0);
+
+		const close = toaster.popup("好友请求", { duration: null });
+		await new Promise((resolve) => setTimeout(resolve, 30));
+		expect(toaster.toasts().size).toBe(1);
+		close();
+		expect(toaster.toasts().size).toBe(0);
+	});
+
 	test("rejects blank friend search ids without querying", async () => {
 		const { sqlite, queried } = create_sqlite_stub();
 
