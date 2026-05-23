@@ -154,6 +154,7 @@ test.describe("HomeStore 事件循环", () => {
 		const sender_name = `消息甲-${unique}`;
 		const receiver_name = `消息乙-${unique}`;
 		const message = `你好，阶段4-${unique}`;
+		const before_input_message = `换行输入-${unique}`;
 
 		await register_user(page, sender_name);
 		const receiver_id = await register_user(page, receiver_name);
@@ -191,11 +192,36 @@ test.describe("HomeStore 事件循环", () => {
 			timeout: 30_000,
 		});
 
+		const message_input = page.getByPlaceholder("按回车发送消息");
+		await message_input.fill(before_input_message);
+		const line_break_prevented = await message_input.evaluate((element) => {
+			const textarea = element as HTMLTextAreaElement;
+			const event = new InputEvent("beforeinput", {
+				bubbles: true,
+				cancelable: true,
+				inputType: "insertLineBreak",
+			});
+			const default_allowed = textarea.dispatchEvent(event);
+			if (default_allowed) {
+				textarea.value = `${textarea.value}\n`;
+				textarea.dispatchEvent(new Event("input", { bubbles: true }));
+			}
+			return !default_allowed;
+		});
+		expect(line_break_prevented).toBe(true);
+		await expect(page.getByText(before_input_message)).toBeVisible({
+			timeout: 30_000,
+		});
+		await expect(message_input).toHaveValue("");
+		await expect(receiver_page.getByText(before_input_message)).toBeVisible({
+			timeout: 30_000,
+		});
+
 		await receiver_page.locator('label[aria-label="消息"]').click();
 		const message_entry = receiver_page.getByRole("button", {
 			name: `打开与 ${sender_name} 的消息`,
 		});
 		await expect(message_entry).toBeVisible();
-		await expect(message_entry.getByText(message)).toBeVisible();
+		await expect(message_entry.getByText(before_input_message)).toBeVisible();
 	});
 });

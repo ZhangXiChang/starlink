@@ -72,6 +72,7 @@ export default function ChatBar(props: { chat_user: User }) {
 	onMount(() => void home_store.connect_chat(props.chat_user.id));
 	const connection_state = () =>
 		home_store.chat_connection_state(props.chat_user.id);
+	let preserve_next_line_break = false;
 	const messages = createAsync(async () => {
 		const u = user();
 		if (!u) throw new Error("用户不存在");
@@ -83,10 +84,29 @@ export default function ChatBar(props: { chat_user: User }) {
 		);
 	});
 	const send_draft_message = () => {
+		preserve_next_line_break = false;
 		const content = draft_message().trim();
 		if (content === "") return;
 		set_draft_message("");
 		void home_store.send_chat_message(props.chat_user.id, content);
+	};
+	const handle_draft_message_key_down = (event: KeyboardEvent) => {
+		if (event.key !== "Enter") return;
+		if (event.shiftKey) {
+			preserve_next_line_break = true;
+			return;
+		}
+		event.preventDefault();
+		send_draft_message();
+	};
+	const handle_draft_message_before_input = (event: InputEvent) => {
+		if (event.inputType !== "insertLineBreak") return;
+		if (preserve_next_line_break) {
+			preserve_next_line_break = false;
+			return;
+		}
+		event.preventDefault();
+		send_draft_message();
 	};
 	const message_sender_name = (message: Message) =>
 		message.sender_id === props.chat_user.id
@@ -203,11 +223,8 @@ export default function ChatBar(props: { chat_user: User }) {
 					placeholder="按回车发送消息"
 					value={draft_message()}
 					onInput={(event) => set_draft_message(event.currentTarget.value)}
-					onKeyDown={(event) => {
-						if (event.key !== "Enter" || event.shiftKey) return;
-						event.preventDefault();
-						send_draft_message();
-					}}
+					onKeyDown={handle_draft_message_key_down}
+					onBeforeInput={handle_draft_message_before_input}
 				/>
 			</div>
 		</div>
