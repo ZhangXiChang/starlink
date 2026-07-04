@@ -20,13 +20,11 @@
 
 ### 准备工作
 
-- [Tauri](https://v2.tauri.app/start/prerequisites): 原生应用开发框架
+- [Tauri先决条件](https://v2.tauri.app/start/prerequisites): 原生应用开发框架所需的开发环境
 - [Bun](https://bun.com/docs/installation): 前端包管理工具
 - [uv](https://docs.astral.sh/uv/getting-started/installation): 项目脚本语言
 - [wasm32-unknown-unknown](https://doc.rust-lang.org/beta/rustc/platform-support/wasm32-unknown-unknown.html): 执行`rustup target install wasm32-unknown-unknown`安装
-- [wasm-pack](https://drager.github.io/wasm-pack/installer): Rust WebAssembly 构建工具  
-_如果你要进行安卓开发_
-- [AndroidSDK](https://developer.android.com/studio): 通过AndroidStudio安装AndroidSDK
+- [wasm-pack](https://drager.github.io/wasm-pack/installer): Rust WebAssembly 构建工具
 
 ### 初始化
 
@@ -76,6 +74,6 @@ Commit messages 请遵循 [conventionalcommits](https://www.conventionalcommits.
 - fix: 缺陷修复
 - feat: 新特性或功能
 - docs: 文档更新
-- chore: 其他提交
+- chore: 杂项
 
 期待您的参与，让我们一起使 Pupu 变得更好！

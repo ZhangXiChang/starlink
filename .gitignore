@@ -9,7 +9,7 @@
 /test-results/
 /playwright-report/
 /.playwright-mcp/
-/.sisyphus/
 
 /public/db_schema.sql
 /keystore.properties
+/temp.db
