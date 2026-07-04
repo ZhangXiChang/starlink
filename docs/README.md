@@ -1,5 +1,6 @@
->_项目现在还在积极重构用户界面中_
-![Pupu Banner](images/banner.svg)
+> _项目现在还在积极重构用户界面中_
+> ![Pupu Banner](images/banner.svg)
+
 <div align="center">
   <div>
     <a href="https://github.com/zhangxichang/pupu"><img alt="P2P" src="https://img.shields.io/badge/P2P-即时通讯-009688?style=flat-square" /></a>
@@ -35,7 +36,7 @@
 - 🌐 **分布式P2P架构**：基于分布式点对点技术，用户连接无需特定服务器
 - 🔐 **端到端加密**：所有通信数据端到端加密传输，保障通信安全
 
->_本项目仅提供开源软件，请遵守法律法规，**禁止用于违法用途**。_
+> _本项目仅提供开源软件，请遵守法律法规，**禁止用于违法用途**。_
 
 ## 📥 下载
 

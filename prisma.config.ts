@@ -1,8 +1,8 @@
 import { defineConfig } from "prisma/config";
 
 export default defineConfig({
-	schema: "schema.prisma",
-	datasource: {
-		url: "file:temp.db",
-	},
+  schema: "schema.prisma",
+  datasource: {
+    url: "file:temp.db",
+  },
 });
