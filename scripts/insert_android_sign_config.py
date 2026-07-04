@@ -2,11 +2,9 @@ from argparse import ArgumentParser
 from pathlib import Path
 import re
 from shutil import copyfile
+import sys
 from textwrap import indent
 
-DEFAULT_KEYSTORE_ALIAS = "androiddebugkey"
-DEFAULT_KEYSTORE_PASSWORD = "android"
-DEFAULT_DEBUG_KEYSTORE = Path.home() / ".android" / "debug.keystore"
 ANDROID_PROJECT_DIR = Path("native/gen/android")
 GRADLE_BUILD_SCRIPT = ANDROID_PROJECT_DIR / "app/build.gradle.kts"
 GENERATED_KEYSTORE_PROPERTIES = ANDROID_PROJECT_DIR / "keystore.properties"
@@ -33,21 +31,36 @@ GENERATED_SIGNING_CONFIG_MARKERS = (
 )
 
 
-def default_debug_keystore_properties() -> str:
+class KeystorePropertiesError(ValueError):
+    pass
+
+
+def format_keystore_properties_error(properties_path: Path) -> str:
     return (
-        f"storeFile={DEFAULT_DEBUG_KEYSTORE.as_posix()}\n"
-        f"keyAlias={DEFAULT_KEYSTORE_ALIAS}\n"
-        f"password={DEFAULT_KEYSTORE_PASSWORD}\n"
+        "错误：无法初始化 Android 签名配置\n"
+        "\n"
+        "原因：\n"
+        f"  未读取到可用的签名配置文件：{properties_path}\n"
+        "  该文件不存在，或文件内容为空。\n"
+        "\n"
+        "应该怎么做：\n"
+        f"  请确保 {properties_path} 满足以下条件：\n"
+        "  1. 文件存在于项目根目录\n"
+        "  2. 文件内容不为空\n"
+        "  3. 文件包含以下字段：\n"
+        "     storeFile=你的 keystore 文件路径\n"
+        "     keyAlias=你的 key alias\n"
+        "     password=你的 keystore/key 密码\n"
+        "\n"
+        "完成后重新运行 android:init。"
     )
 
 
-def ensure_keystore_properties(properties_path: Path):
+def validate_keystore_properties(properties_path: Path):
     if properties_path.exists() and properties_path.read_text(encoding="utf-8").strip():
         return
 
-    properties_path.parent.mkdir(parents=True, exist_ok=True)
-    properties_path.write_text(default_debug_keystore_properties(), encoding="utf-8")
-    print(f"{properties_path}未初始化，已创建默认debug keystore配置")
+    raise KeystorePropertiesError(format_keystore_properties_error(properties_path))
 
 
 def find_matching_brace(source: str, opening_brace_index: int) -> int:
@@ -194,7 +207,11 @@ def main():
     arg = arg_parser.parse_args()
 
     keystore_properties_path = Path(arg.path)
-    ensure_keystore_properties(keystore_properties_path)
+    try:
+        validate_keystore_properties(keystore_properties_path)
+    except KeystorePropertiesError as error:
+        print(error, file=sys.stderr)
+        raise SystemExit(1) from None
 
     GENERATED_KEYSTORE_PROPERTIES.parent.mkdir(parents=True, exist_ok=True)
     copyfile(keystore_properties_path, GENERATED_KEYSTORE_PROPERTIES)
