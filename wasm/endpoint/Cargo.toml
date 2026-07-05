@@ -10,10 +10,10 @@ crate-type = ["cdylib"]
 endpoint = { path = "../../crates/endpoint" }
 person-protocol = { path = "../../crates/person-protocol" }
 
-wasm-bindgen = "0.2.120"
-wasm-bindgen-futures = "0.4.70"
+wasm-bindgen = "0.2.126"
+wasm-bindgen-futures = "0.4.76"
 serde-wasm-bindgen = "0.6.5"
 console_error_panic_hook = "0.1.7"
 wasm-logger = "0.2.0"
-log = "0.4.29"
+log = "0.4.33"
 eyre = "0.6.12"

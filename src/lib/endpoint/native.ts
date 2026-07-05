@@ -1,4 +1,4 @@
-import { createTauRPCProxy, type JsonValue } from "~/generated/ipc_bindings";
+import { createTauRPCProxy } from "~/generated/ipc_bindings";
 import type { Endpoint, EndpointModule } from "./interface";
 import type { Person, PersonProtocolEvent, RelayConfig } from "./types";
 
@@ -28,7 +28,7 @@ export class EndpointModuleImpl implements EndpointModule {
 export class EndpointImpl implements Endpoint {
   private readonly handle;
 
-  private constructor(handle: bigint) {
+  private constructor(handle: number) {
     this.handle = handle;
   }
   static async new(
@@ -39,7 +39,7 @@ export class EndpointImpl implements Endpoint {
     return new EndpointImpl(
       await createTauRPCProxy().endpoint.open_endpoint(
         Array.from(secret_key),
-        person as unknown as JsonValue,
+        person,
         relay_configs,
       ),
     );
@@ -65,7 +65,7 @@ export class EndpointImpl implements Endpoint {
     return (await createTauRPCProxy().endpoint.request_person(
       this.handle,
       id,
-    )) as unknown as Person;
+    )) as Person;
   }
   async request_friend(id: string) {
     return await createTauRPCProxy().endpoint.request_friend(this.handle, id);

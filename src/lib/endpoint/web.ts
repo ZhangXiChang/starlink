@@ -62,9 +62,9 @@ export class EndpointImpl implements Endpoint {
   }
   async request_chat(id: string) {
     const a = await this.endpoint.request_chat(id);
-    return a != undefined ? (a as unknown as bigint) : null;
+    return a != undefined ? a : null;
   }
   async subscribe_group(ticket: string) {
-    return (await this.endpoint.subscribe_group(ticket)) as unknown as bigint;
+    return await this.endpoint.subscribe_group(ticket);
   }
 }

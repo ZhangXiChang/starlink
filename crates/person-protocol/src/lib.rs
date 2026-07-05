@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use eyre::{Result, bail, eyre};
+use eyre::{Result, eyre};
 use futures::channel::oneshot;
 use iroh::{
     Endpoint, EndpointId,
@@ -163,7 +163,7 @@ impl PersonProtocol {
             &recv.read_to_end(usize::MAX).await?,
         )?
         else {
-            bail!("响应数据非预期");
+            return Err(eyre!("响应数据非预期"));
         };
         Ok(person)
     }
@@ -177,7 +177,7 @@ impl PersonProtocol {
             &recv.read_to_end(usize::MAX).await?,
         )?
         else {
-            bail!("响应数据非预期");
+            return Err(eyre!("响应数据非预期"));
         };
         Ok(result)
     }
@@ -191,7 +191,7 @@ impl PersonProtocol {
             &recv.read_to_end(usize::MAX).await?,
         )?
         else {
-            bail!("响应数据非预期");
+            return Err(eyre!("响应数据非预期"));
         };
         if !result {
             return Ok(None);

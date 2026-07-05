@@ -12,7 +12,10 @@ use tokio_rusqlite::{hooks::Action, params_from_iter};
 
 use crate::{
     error::MapStringError,
-    router::sqlite_api::{traits::IntoJSONValue, types::SQLiteUpdateEvent, utils::json_sql_params},
+    router::{
+        sqlite_api::{traits::IntoJSONValue, types::IpcSQLiteUpdateEvent, utils::json_sql_params},
+        types::IpcJsonValue,
+    },
 };
 
 #[taurpc::procedures(path = "sqlite")]
@@ -20,17 +23,14 @@ pub trait SQLiteApi {
     async fn open_db<R: Runtime>(window: Window<R>, path: String) -> Result<usize, String>;
     async fn close_db(handle: usize) -> Result<(), String>;
     async fn execute_sql(handle: usize, sql: String) -> Result<(), String>;
-    async fn execute(
-        handle: usize,
-        sql: String,
-        params: Vec<serde_json::Value>,
-    ) -> Result<(), String>;
+    async fn execute(handle: usize, sql: String, params: Vec<IpcJsonValue>) -> Result<(), String>;
     async fn query(
         handle: usize,
         sql: String,
-        params: Vec<serde_json::Value>,
-    ) -> Result<Vec<serde_json::Value>, String>;
-    async fn on_update(handle: usize, channel: Channel<SQLiteUpdateEvent>) -> Result<(), String>;
+        params: Vec<IpcJsonValue>,
+    ) -> Result<Vec<IpcJsonValue>, String>;
+    async fn on_update(handle: usize, channel: Channel<IpcSQLiteUpdateEvent>)
+    -> Result<(), String>;
 }
 
 #[derive(Clone, Default)]
@@ -104,9 +104,10 @@ impl SQLiteApi for SQLiteApiImpl {
         self,
         handle: usize,
         sql: String,
-        params: Vec<serde_json::Value>,
+        params: Vec<IpcJsonValue>,
     ) -> Result<(), String> {
         async {
+            let params = params.into_iter().map(Into::into).collect();
             self.connection_pool
                 .get_owned(handle)
                 .get()?
@@ -125,9 +126,10 @@ impl SQLiteApi for SQLiteApiImpl {
         self,
         handle: usize,
         sql: String,
-        params: Vec<serde_json::Value>,
-    ) -> Result<Vec<serde_json::Value>, String> {
+        params: Vec<IpcJsonValue>,
+    ) -> Result<Vec<IpcJsonValue>, String> {
         async {
+            let params = params.into_iter().map(Into::into).collect();
             eyre::Ok(
                 self.connection_pool
                     .get_owned(handle)
@@ -149,7 +151,7 @@ impl SQLiteApi for SQLiteApiImpl {
                                             .into_json_value(),
                                     );
                                 }
-                                Ok(serde_json::Value::Object(object))
+                                Ok(IpcJsonValue::from(serde_json::Value::Object(object)))
                             })?
                             .collect::<Result<Vec<_>, _>>()?;
                         eyre::Ok(result)
@@ -164,7 +166,7 @@ impl SQLiteApi for SQLiteApiImpl {
     async fn on_update(
         self,
         handle: usize,
-        channel: Channel<SQLiteUpdateEvent>,
+        channel: Channel<IpcSQLiteUpdateEvent>,
     ) -> Result<(), String> {
         async {
             self.connection_pool
@@ -173,7 +175,7 @@ impl SQLiteApi for SQLiteApiImpl {
                 .call(move |connection| {
                     connection.update_hook(Some(
                         move |action: Action, db_name: &str, table_name: &str, row_id| {
-                            if let Err(err) = channel.send(SQLiteUpdateEvent {
+                            if let Err(err) = channel.send(IpcSQLiteUpdateEvent {
                                 update_type: match action {
                                     Action::SQLITE_DELETE => 9,
                                     Action::SQLITE_INSERT => 18,

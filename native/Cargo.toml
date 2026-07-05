@@ -9,31 +9,31 @@ name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.6.0", features = [] }
+tauri-build = { version = "2.6.3", features = [] }
 
 [dependencies]
 utils = { path = "../crates/utils" }
 endpoint = { path = "../crates/endpoint" }
 person-protocol = { path = "../crates/person-protocol" }
 
-tauri = { version = "2.11.1", features = ["test"] }
-serde_json = "1.0.149"
-taurpc = "0.7.1"
-specta = { version = "=2.0.0-rc.22", features = ["serde_json"] }
-specta-typescript = "=0.0.9"
-tauri-plugin-prevent-default = { version = "5.0.0", features = [
+tauri = { version = "2.11.5", features = ["test"] }
+serde_json = "1.0.150"
+taurpc = "0.8.2"
+specta = { version = "2.0.0-rc.25", features = ["serde_json"] }
+specta-typescript = "0.0.12"
+tauri-plugin-prevent-default = { version = "5.0.2", features = [
     "platform-windows",
 ] }
-tauri-plugin-single-instance = "2.4.1"
+tauri-plugin-single-instance = "2.4.2"
 tauri-plugin-os = "2.3.2"
-tauri-plugin-opener = "2.5.3"
+tauri-plugin-opener = "2.5.4"
 tauri-plugin-notification = "2.3.3"
 
 eyre = "0.6.12"
-log = "0.4.29"
-flexi_logger = { version = "0.31.8", features = ["json", "compress"] }
+log = "0.4.33"
+flexi_logger = { version = "0.31.9", features = ["json", "compress"] }
 serde = { version = "1.0.228", features = ["derive"] }
-tokio = { version = "1.52.1", features = [
+tokio = { version = "1.52.3", features = [
     "parking_lot",
     "rt-multi-thread",
     "macros",

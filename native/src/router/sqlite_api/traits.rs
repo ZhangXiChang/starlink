@@ -1,4 +1,4 @@
-use eyre::{Result, bail};
+use eyre::{Result, eyre};
 use utils::option_ext::OptionGet;
 
 pub trait IntoSQLiteValue {
@@ -16,7 +16,7 @@ impl IntoSQLiteValue for serde_json::Value {
                 .map(|v| Ok(v.as_u64().get()? as _))
                 .collect::<Result<Vec<u8>>>()?
                 .into()),
-            serde_json::Value::Object(_) => bail!("目标不能为对象"),
+            serde_json::Value::Object(_) => Err(eyre!("目标不能为对象")),
         }
     }
 }

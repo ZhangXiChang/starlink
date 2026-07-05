@@ -1,5 +1,5 @@
 import type { CompiledQuery } from "kysely";
-import { createTauRPCProxy, type JsonValue } from "~/generated/ipc_bindings";
+import { createTauRPCProxy } from "~/generated/ipc_bindings";
 import type { SQLite, SQLiteModule } from "./interface";
 import type { SQLiteUpdateEvent } from "./types";
 
@@ -16,7 +16,7 @@ export class SQLiteImpl implements SQLite {
   private on_updates;
 
   private constructor(
-    handle: bigint,
+    handle: number,
     on_updates: ((event: SQLiteUpdateEvent) => void)[],
   ) {
     this.handle = handle;
@@ -40,14 +40,14 @@ export class SQLiteImpl implements SQLite {
     await createTauRPCProxy().sqlite.execute(
       this.handle,
       compiled_query.sql,
-      compiled_query.parameters as JsonValue[],
+      compiled_query.parameters as unknown[],
     );
   }
   async query<T>(compiled_query: CompiledQuery) {
     return (await createTauRPCProxy().sqlite.query(
       this.handle,
       compiled_query.sql,
-      compiled_query.parameters as JsonValue[],
+      compiled_query.parameters as unknown[],
     )) as T[];
   }
   on_update(callback: (event: SQLiteUpdateEvent) => void) {
