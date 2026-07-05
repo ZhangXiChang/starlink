@@ -5,7 +5,7 @@ use sharded_slab::Slab;
 use tauri::{Runtime, Window};
 use utils::option_ext::OptionGet;
 
-use crate::error::MapStringError;
+use crate::{error::MapStringError, router::types::IpcJsonValue};
 
 #[taurpc::procedures(path = "endpoint")]
 pub trait EndpointApi {
@@ -16,17 +16,14 @@ pub trait EndpointApi {
     async fn open_endpoint<R: Runtime>(
         window: Window<R>,
         secret_key: Vec<u8>,
-        person: serde_json::Value,
-        relay_configs: Vec<serde_json::Value>,
+        person: IpcJsonValue,
+        relay_configs: Vec<IpcJsonValue>,
     ) -> Result<usize, String>;
     async fn close_endpoint(handle: usize) -> Result<(), String>;
     async fn id(handle: usize) -> Result<String, String>;
     async fn person_protocol_next_event(handle: usize) -> Result<String, String>;
-    async fn person_protocol_event(
-        handle: usize,
-        method: String,
-    ) -> Result<serde_json::Value, String>;
-    async fn request_person(handle: usize, id: String) -> Result<serde_json::Value, String>;
+    async fn person_protocol_event(handle: usize, method: String) -> Result<IpcJsonValue, String>;
+    async fn request_person(handle: usize, id: String) -> Result<IpcJsonValue, String>;
     async fn request_friend(handle: usize, id: String) -> Result<bool, String>;
     async fn request_chat(handle: usize, id: String) -> Result<Option<usize>, String>;
     async fn subscribe_group(handle: usize, ticket: String) -> Result<usize, String>;
@@ -58,8 +55,8 @@ impl EndpointApi for EndpointApiImpl {
         self,
         #[allow(unused_variables)] window: Window<R>,
         secret_key: Vec<u8>,
-        person: serde_json::Value,
-        relay_configs: Vec<serde_json::Value>,
+        person: IpcJsonValue,
+        relay_configs: Vec<IpcJsonValue>,
     ) -> Result<usize, String> {
         async {
             let store_path;
@@ -87,11 +84,11 @@ impl EndpointApi for EndpointApiImpl {
                     .insert(
                         Endpoint::new(
                             secret_key,
-                            serde_json::from_value(person)?,
+                            serde_json::from_value(person.into())?,
                             store_path,
                             relay_configs
                                 .into_iter()
-                                .map(|v| serde_json::from_value::<RelayConfig>(v))
+                                .map(|v| serde_json::from_value::<RelayConfig>(v.into()))
                                 .collect::<Result<_, _>>()?,
                         )
                         .await?,
@@ -129,25 +126,26 @@ impl EndpointApi for EndpointApiImpl {
         self,
         handle: usize,
         method: String,
-    ) -> Result<serde_json::Value, String> {
+    ) -> Result<IpcJsonValue, String> {
         Ok(self
             .endpoint_pool
             .get(handle)
             .get()
             .mse()?
             .person_protocol_event(method)
-            .mse()?)
+            .mse()?
+            .into())
     }
-    async fn request_person(self, handle: usize, id: String) -> Result<serde_json::Value, String> {
+    async fn request_person(self, handle: usize, id: String) -> Result<IpcJsonValue, String> {
         async {
-            eyre::Ok(serde_json::to_value(
+            eyre::Ok(IpcJsonValue::from(serde_json::to_value(
                 &self
                     .endpoint_pool
                     .get_owned(handle)
                     .get()?
                     .request_person(id)
                     .await?,
-            )?)
+            )?))
         }
         .await
         .mse()

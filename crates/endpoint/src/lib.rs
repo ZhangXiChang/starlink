@@ -66,7 +66,9 @@ impl Endpoint {
             .address_lookup(PkarrResolver::n0_dns());
         #[cfg(not(target_family = "wasm"))]
         {
-            use iroh::address_lookup::{DhtAddressLookup, DnsAddressLookup, MdnsAddressLookup};
+            use iroh::address_lookup::DnsAddressLookup;
+            use iroh_mainline_address_lookup::DhtAddressLookup;
+            use iroh_mdns_address_lookup::MdnsAddressLookup;
 
             endpoint_builder = endpoint_builder
                 .address_lookup(MdnsAddressLookup::builder())

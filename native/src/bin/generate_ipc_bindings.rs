@@ -1,28 +1,19 @@
 use app_lib::router;
-use tauri::test::mock_builder;
+use eyre::Result;
 
-#[taurpc::procedures(export_to = "src/generated/ipc_bindings.ts")]
-trait Api {
-    async fn unreachable();
-}
-
-#[derive(Clone, Default)]
-struct ApiImpl;
-#[taurpc::resolvers]
-impl Api for ApiImpl {
-    async fn unreachable(self) {
-        panic!("此函数仅用于占位，请勿使用");
-    }
-}
+const BINDINGS_PATH: &str = "src/generated/ipc_bindings.ts";
 
 #[tokio::main]
-async fn main() {
-    mock_builder()
-        .invoke_handler(
-            router()
-                .merge(ApiImpl::default().into_handler())
-                .into_handler(),
-        )
-        .build(tauri::generate_context!())
-        .unwrap();
+async fn main() -> Result<()> {
+    taurpc::Exporter::new().export(&router::<tauri::Wry>(), BINDINGS_PATH)?;
+    remove_unused_unlisten_import()?;
+    Ok(())
+}
+
+fn remove_unused_unlisten_import() -> Result<()> {
+    let bindings = std::fs::read_to_string(BINDINGS_PATH)?;
+    if !bindings.contains("Promise<UnlistenFn>") {
+        std::fs::write(BINDINGS_PATH, bindings.replace(", type UnlistenFn", ""))?;
+    }
+    Ok(())
 }

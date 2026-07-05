@@ -19,6 +19,6 @@ export interface Endpoint {
   person_protocol_event<T>(method: string): Promise<T>;
   request_person(id: string): Promise<Person>;
   request_friend(id: string): Promise<boolean>;
-  request_chat(id: string): Promise<bigint | null>;
-  subscribe_group(ticket: string): Promise<bigint>;
+  request_chat(id: string): Promise<number | null>;
+  subscribe_group(ticket: string): Promise<number>;
 }

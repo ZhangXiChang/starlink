@@ -73,7 +73,7 @@ export class SQLiteWorker implements Init {
     this.get_api().update_hook(
       db,
       (update_type, db_name, table_name, row_id) => {
-        callback({ update_type, db_name, table_name, row_id });
+        callback({ update_type, db_name, table_name, row_id: Number(row_id) });
       },
     );
   }
